@@ -2,31 +2,31 @@ from acceso_base_datos import conexion
 from inventario import verificar_stock_minimo
 
 def agregar_receta(nombre):
-    conexion = conexion()
-    if not conexion:
+    conexion_bd = conexion()
+    if not conexion_bd:
         return
-    cursor = conexion.cursor()
+    cursor = conexion_bd.cursor()
     cursor.execute("INSERT INTO recetas (nombre) VALUES (?)", (nombre,))
-    conexion.commit()
-    conexion.close()
+    conexion_bd.commit()
+    conexion_bd.close()
     print(f"Receta '{nombre}' agregada.")
 
 def agregar_ingrediente_a_receta(receta_id, producto_id, cantidad, unidad):
-    conexion = conexion()
-    if not conexion:
+    conexion_bd = conexion()
+    if not conexion_bd:
         return
-    cursor = conexion.cursor()
+    cursor = conexion_bd.cursor()
     cursor.execute("INSERT INTO receta_ingredientes (receta_id, producto_id, cantidad, unidad) VALUES (?, ?, ?, ?)", (receta_id, producto_id, cantidad, unidad))
-    conexion.commit()
-    conexion.close()
+    conexion_bd.commit()
+    conexion_bd.close()
     print(f"Ingrediente añadido a receta {receta_id}.")
 
 #lo metemos aqui ete metodo ya que toca productos pero est relacioado con las recetas.
 def preparar_receta(receta_id):
-    conn = conexion()
-    if not conn:
+    conexion_bd = conexion()
+    if not conexion_bd:
         return
-    cursor = conn.cursor()
+    cursor = conexion_bd.cursor()
 
     # obtenemos los ingredientes de la receta
     cursor.execute("SELECT ri.producto_id, ri.cantidad, ri.unidad, p.cantidad, p.nombre FROM receta_ingredientes ri JOIN productos p ON ri.producto_id = p.id WHERE ri.receta_id = ?", (receta_id,))
@@ -43,7 +43,7 @@ def preparar_receta(receta_id):
         print("No se puede preparar la receta. Faltan ingredientes:")
         for nombre, actual, necesario, unidad in faltantes:
             print(f"- {nombre}: hay {actual} {unidad}, se necesitan {necesario} {unidad}")
-        conn.close()
+        conexion_bd.close()
         return
 
     # si todo está OK, descontamos
@@ -51,8 +51,8 @@ def preparar_receta(receta_id):
         nueva_cantidad = cant_actual - cant_receta
         cursor.execute("UPDATE productos SET cantidad = ? WHERE id = ?", (nueva_cantidad, producto_id))
 
-    conn.commit()
-    conn.close()
+    conexion_bd.commit()
+    conexion_bd.close()
 
     # actualizamos la  lista de compras
     verificar_stock_minimo()
@@ -61,4 +61,3 @@ def preparar_receta(receta_id):
 
 
     #para futuro , quizas hacer algo para saber cuantas recetas podria hacer con lso ingredientes que hay...
-    

@@ -3,20 +3,20 @@ import sqlite3
 
 def conexion(db_name="controllerproduct.db"):
     try:
-        conexion = sqlite3.connect(db_name)
+        conexion_bd = sqlite3.connect(db_name)
         print("Conexión exitosa a la base de datos")
-        return conexion
+        return conexion_bd
     except sqlite3.Error as e:
         print(f"Error al conectar a la base de datos: {e}")
         return None
     
 
 def crar_tablas():
-    conexion = conexion()
-    if not conexion:
+    conexion_bd = conexion()
+    if not conexion_bd:
         return 
 
-    cursor = conexion.cursor()
+    cursor = conexion_bd.cursor()
     
     # Tabla de productos
     cursor.execute("""
@@ -61,5 +61,5 @@ def crar_tablas():
     )
     """)
     
-    conexion.commit()
-    conexion.close()   
+    conexion_bd.commit()
+    conexion_bd.close()   
