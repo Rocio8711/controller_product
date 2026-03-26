@@ -57,9 +57,21 @@ def crar_tablas():
         producto_id INTEGER NOT NULL,
         cantidad REAL NOT NULL,
         unidad TEXT NOT NULL,
-        FOREIGN KEY (producto_id) REFERENCES productos(id)
+        comprado INTEGER DEFAULT 0,
+        usuario_id_asignado INTEGER,
+        FOREIGN KEY (producto_id) REFERENCES productos(id),
+        FOREIGN KEY (usuario_id_asignado) REFERENCES usuarios(id)
     )
     """)
-    
+
+    # Tabla de lista de usuario
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        contrasena TEXT NOT NULL
+    )
+    """)
     conexion_bd.commit()
     conexion_bd.close()   
