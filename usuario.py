@@ -2,7 +2,21 @@ import sqlite3
 from acceso_base_datos import conexion
 
 
-def agregar_usuario(nombre,email,contrasena):
+def login(email, contrasena):
+    conn = conexion()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT id, nombre FROM usuarios WHERE email = ? AND contrasena = ?",
+        (email, contrasena)
+    )
+
+    usuario = cursor.fetchone()
+    conn.close()
+
+    return usuario
+
+'''def agregar_usuario(nombre,email,contrasena):
     conexion_bd = conexion()
     if not conexion_bd:
         return
@@ -16,14 +30,22 @@ def agregar_usuario(nombre,email,contrasena):
     conexion_bd.close()
     print(f"Usuario '{nombre}' creado.")
 
-def comprobar_existe_usuario(email):
-    conexion_bd=conexion()
+def comprobar_existe_usuario(email, contrasena):
+    conexion_bd = conexion()
     if not conexion_bd:
         return False
+
     cursor = conexion_bd.cursor()
-    cursor.execute("SELECT * FROM usuarios where email=?",(email,))
-    resultado=cursor.fetchone()
+
+    cursor.execute(
+        "SELECT id FROM usuarios WHERE email = ? AND contrasena = ?",
+        (email, contrasena)
+    )
+
+    resultado = cursor.fetchone()
+
     conexion_bd.close()
+
     return resultado is not None
 
 def comprobar_contrasena(email, contrasena):
@@ -36,4 +58,6 @@ def comprobar_contrasena(email, contrasena):
     resultado = cursor.fetchone()
     conexion_bd.close()
 
-    return resultado is not None
+    return resultado is not None'''
+
+

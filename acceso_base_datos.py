@@ -11,7 +11,7 @@ def conexion(db_name="controllerproduct.db"):
         return None
     
 
-def crar_tablas():
+def crear_tablas():
     conexion_bd = conexion()
     if not conexion_bd:
         return 
@@ -75,3 +75,5 @@ def crar_tablas():
     """)
     conexion_bd.commit()
     conexion_bd.close()   
+
+    

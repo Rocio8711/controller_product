@@ -1,5 +1,6 @@
 from acceso_base_datos import conexion
 from inventario import verificar_stock_minimo
+from lista_compra import marcar_comprado
 
 def agregar_receta(nombre):
     conexion_bd = conexion()
@@ -61,3 +62,48 @@ def preparar_receta(receta_id):
 
 
     #para futuro , quizas hacer algo para saber cuantas recetas podria hacer con lso ingredientes que hay...
+
+
+def generar_lista_desde_receta(receta_id, usuario_id=None):
+    conexion_bd = conexion()
+    if not conexion_bd:
+        return
+
+    cursor = conexion_bd.cursor()
+
+    # Obtenemos ingredientes + stock actual
+    cursor.execute("""
+        SELECT ri.producto_id, ri.cantidad, ri.unidad, p.cantidad
+        FROM receta_ingredientes ri
+        JOIN productos p ON ri.producto_id = p.id
+        WHERE ri.receta_id = ?
+    """, (receta_id,))
+
+    ingredientes = cursor.fetchall()
+
+    for producto_id, cantidad_receta, unidad, stock_actual in ingredientes:
+
+        # Solo añadimos si falta stock
+        if stock_actual < cantidad_receta:
+
+            cantidad_faltante = cantidad_receta - stock_actual
+
+            # Comprobamos si ya está en lista
+            cursor.execute("""
+                SELECT id FROM lista_compras
+                WHERE producto_id = ? AND comprado = 0
+            """, (producto_id,))
+
+            existe = cursor.fetchone()
+
+            if not existe:
+                cursor.execute("""
+                    INSERT INTO lista_compras
+                    (producto_id, cantidad, unidad, comprado, usuario_id_asignado)
+                    VALUES (?, ?, ?, 0, ?)
+                """, (producto_id, cantidad_faltante, unidad, usuario_id))
+
+    conexion_bd.commit()
+    conexion_bd.close()
+
+    print("Lista de compras generada inteligentemente")

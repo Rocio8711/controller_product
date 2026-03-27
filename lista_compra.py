@@ -60,3 +60,19 @@ def ver_tareas_usuario(usuario_id):
     conn.close()
     
     return resultados
+
+def ver_tareas_todas():
+    conn = conexion()
+    if not conn:
+        return []
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT lc.id, p.nombre, lc.cantidad, lc.unidad
+        FROM lista_compras lc
+        JOIN productos p ON lc.producto_id = p.id
+        WHERE lc.comprado = 0
+    """)
+    resultados = cursor.fetchall()
+    conn.close()
+    
+    return resultados
