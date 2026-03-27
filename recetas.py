@@ -105,5 +105,16 @@ def generar_lista_desde_receta(receta_id, usuario_id=None):
 
     conexion_bd.commit()
     conexion_bd.close()
-
     print("Lista de compras generada inteligentemente")
+def obtener_recetas():
+    from acceso_base_datos import conexion
+
+    conn = conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id, nombre FROM recetas")
+    recetas = cursor.fetchall()
+
+    conn.close()
+    return recetas
+    
