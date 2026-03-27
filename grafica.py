@@ -1,214 +1,264 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+
+# Imports de tus módulos personalizados
 from lista_compra import marcar_comprado, ver_tareas_todas
-from recetas import generar_lista_desde_receta, obtener_recetas   # 👈 IMPORTANTE
-from acceso_base_datos import conexion
-from recetas import obtener_recetas, preparar_receta
+from recetas import (
+    generar_lista_desde_receta, 
+    obtener_recetas, 
+    preparar_receta
+)
 from inventario import ver_inventario
+from acceso_base_datos import conexion
 
-class App:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("SmartKitchen Inventory")
-        self.root.geometry("700x500")
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
 
-        # =========================
-        # FRAME BOTONES (ARRIBA)
-        # =========================
-        frame_botones = tk.Frame(root)
-        frame_botones.pack(pady=10)
+        self.title("SmartKitchen Inventory")
+        self.geometry("800x600")
 
-        tk.Button(frame_botones, text="Cargar lista", command=self.cargar_lista).pack(side="left", padx=5)
-        tk.Button(frame_botones, text="Marcar comprado", command=self.marcar_seleccionado).pack(side="left", padx=5)
-        tk.Button(frame_botones, text="Ver lista compras", command=self.mostrar_compras).pack(side="left", padx=5)
-        tk.Button(frame_botones, text="Ver inventario", command=self.mostrar_inventario).pack(side="left", padx=5)
+        # Contenedor principal para los frames
+        container = tk.Frame(self)
+        container.pack(fill="both", expand=True)
 
-        # =========================
-        # TABLA (CENTRO)
-        # =========================
-        self.tree = ttk.Treeview(
-            root,
-            columns=("ID", "Producto", "Cantidad", "Unidad"),
-            show="headings"
-        )
+        # Configuración de pesos para que los frames hijos se expandan
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Producto", text="Producto")
-        self.tree.heading("Cantidad", text="Cantidad")
-        self.tree.heading("Unidad", text="Unidad")
+        self.frames = {}
 
-        self.tree.pack(fill="both", expand=True)
+        # Inicialización de todos los frames
+        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(HomeFrame)
+
+    '''def show_frame(self, frame_class):
+        """Muestra el frame solicitado elevándolo al frente"""
+        frame = self.frames[frame_class]
+        frame.tkraise()'''
 
 
+    def show_frame(self, frame_class):
+        frame = self.frames[frame_class]
+        frame.tkraise()
 
-        #ver inventario
-        self.tree_inventario = ttk.Treeview(
-            root,
-            columns=("ID", "Producto", "Cantidad", "Unidad", "Min"),
-            show="headings"
-        )
+        # 🔥 ejecutar después de que Tkinter renderice la pantalla
+        self.after(50, self._refresh_frame, frame)
 
-        self.tree_inventario.heading("ID", text="ID")
-        self.tree_inventario.heading("Producto", text="Producto")
-        self.tree_inventario.heading("Cantidad", text="Cantidad")
-        self.tree_inventario.heading("Unidad", text="Unidad")
-        self.tree_inventario.heading("Min", text="Stock mínimo")
+    def _refresh_frame(self, frame):
+        if hasattr(frame, "cargar"):
+            # evitar doble ejecución accidental
+            if not getattr(frame, "_cargando", False):
+                frame._cargando = True
+                frame.cargar()
+                frame._cargando = False
 
-        # 👇 NO SE MUESTRA AL INICIO
-        self.tree_inventario.pack_forget()
+# =========================
+# 🏠 HOME
+# =========================
+class HomeFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
 
+        # Centrar contenido
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
-        # =========================
-        # FRAME RECETAS (ABAJO)
-        # =========================
-        frame_recetas = tk.Frame(root)
-        frame_recetas.pack(pady=10)
+        contenido = tk.Frame(self)
+        contenido.grid(row=0, column=0)
 
-        tk.Label(frame_recetas, text="Recetas disponibles").pack()
+        # Título
+        tk.Label(
+            contenido,
+            text="SMART KITCHEN",
+            font=("Arial", 26, "bold"),
+            fg="#2E7D32"
+        ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
 
-        self.lista_recetas = tk.Listbox(frame_recetas, height=5)
-        self.lista_recetas.pack()
-
-        tk.Button(frame_recetas, text="Usar receta", command=self.usar_receta).pack(pady=5)
-
-        # CARGAMOS RECETAS
-        self.cargar_recetas()
-
-        #  ESTO ES CLAVE
-        self.mostrar_compras()
-    # =========================
-    # CARGAR LISTA COMPRAS
-    # =========================
-    def cargar_lista(self):
+        # Imagen de Logo
         try:
-            datos = ver_tareas_todas()
+            # Asegúrate de que esta ruta sea correcta en tu PC
+            image = Image.open(r"C:\Users\sienr\Documents\Proyecto_ControllerProduct\logo.jpeg")
+            image = image.resize((180, 180))
+            controller.logo_img = ImageTk.PhotoImage(image)
+            tk.Label(contenido, image=controller.logo_img).grid(row=1, column=0, padx=40)
+        except Exception:
+            tk.Label(contenido, text="[Logo no encontrado]", fg="red", font=("Arial", 12)).grid(row=1, column=0, padx=40)
 
-            # Limpiamos tabla
-            for item in self.tree.get_children():
-                self.tree.delete(item)
+        # Botones de navegación
+        boton_estilo = {
+            "font": ("Arial", 14, "bold"),
+            "bg": "#4CAF50",
+            "fg": "white",
+            "activebackground": "#45a049",
+            "activeforeground": "white",
+            "width": 20,
+            "bd": 0,
+            "cursor": "hand2",
+            "pady": 10
+        }
 
-            # Insertamos datos
-            for fila in datos:
-                self.tree.insert("", "end", values=fila)
+        frame_botones = tk.Frame(contenido)
+        frame_botones.grid(row=1, column=1, padx=40)
 
+        tk.Button(frame_botones, text="📦 Inventario", command=lambda: controller.show_frame(InventarioFrame), **boton_estilo).pack(pady=10)
+        tk.Button(frame_botones, text="🍳 Recetas", command=lambda: controller.show_frame(RecetasFrame), **boton_estilo).pack(pady=10)
+        tk.Button(frame_botones, text="🛒 Lista de compra", command=lambda: controller.show_frame(ListaFrame), **boton_estilo).pack(pady=10)
+
+
+# =========================
+# 📦 INVENTARIO
+# =========================
+class InventarioFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+
+        tk.Label(self, text="INVENTARIO DE PRODUCTOS", font=("Arial", 18, "bold"), pady=10).pack()
+
+        btn_volver = tk.Button(self, text="⬅ Volver al Inicio", command=lambda: controller.show_frame(HomeFrame))
+        btn_volver.pack(pady=5)
+
+        # Configuración de la tabla
+        columnas = ("ID", "Producto", "Cantidad", "Unidad", "Min")
+        self.tree = ttk.Treeview(self, columns=columnas, show="headings")
+
+        for col in columnas:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, anchor="center", width=100)
+
+        self.tree.pack(fill="both", expand=True, padx=20, pady=10)
+
+        tk.Button(self, text="🔄 Cargar Datos", bg="#2196F3", fg="white", font=("Arial", 10, "bold"),
+                  command=self.cargar).pack(pady=10)
+
+    def cargar(self):
+        datos = ver_inventario()
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        for fila in datos:
+            self.tree.insert("", "end", values=fila)
+
+
+# =========================
+# 🍳 RECETAS
+# =========================
+class RecetasFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+
+        tk.Label(self, text="RECETARIO DISPONIBLE", font=("Arial", 18, "bold"), pady=10).pack()
+
+        tk.Button(self, text="⬅ Volver al Inicio", command=lambda: controller.show_frame(HomeFrame)).pack(pady=5)
+
+        self.listbox = tk.Listbox(self, font=("Arial", 12), width=50, height=10)
+        self.listbox.pack(pady=10)
+
+        btn_frame = tk.Frame(self)
+        btn_frame.pack()
+
+        tk.Button(btn_frame, text="🔄 Cargar Recetas", command=self.cargar, width=15).grid(row=0, column=0, padx=5, pady=10)
+        tk.Button(btn_frame, text="📝 Usar Receta", bg="#FF9800", fg="white", font=("Arial", 10, "bold"),
+                  command=self.usar, width=15).grid(row=0, column=1, padx=5, pady=10)
+
+    def cargar(self):
+        self.listbox.delete(0, tk.END)
+        recetas = obtener_recetas()
+        for r in recetas:
+            self.listbox.insert(tk.END, f"{r[0]} - {r[1]}")
+
+    '''    def usar(self):
+            seleccion = self.listbox.get(tk.ACTIVE)
+            if not seleccion:
+                messagebox.showwarning("Atención", "Por favor, selecciona una receta.")
+                return
+
+            try:
+                receta_id = int(seleccion.split(" - ")[0])
+                generar_lista_desde_receta(receta_id)
+                messagebox.showinfo("Éxito", f"Se han añadido los ingredientes faltantes a la lista de compra.")
+            except Exception as e:
+                messagebox.showerror("Error", f"No se pudo procesar la receta: {e}")
+
+    '''
+
+
+    def usar(self):
+        seleccion = self.listbox.get(tk.ACTIVE)
+        if not seleccion:
+            messagebox.showwarning("Atención", "Por favor, selecciona una receta.")
+            return
+
+        try:
+            receta_id = int(seleccion.split(" - ")[0])
+            # Esta es la función que definimos arriba
+            generar_lista_desde_receta(receta_id)
+            
+            messagebox.showinfo("Proceso Completado", 
+                "Se ha analizado el inventario.\n"
+                "Los ingredientes faltantes han sido añadidos a tu lista de compra.")
+                
         except Exception as e:
-            messagebox.showerror("Error", f"No hemos podido cargar los datos: {e}")
-
-    # =========================
-    # CARGAR RECETAS
-    # =========================
-    def cargar_recetas(self):
-        # Cargamos recetas desde la base de datos
-        conexion_bd = conexion()
-        cursor = conexion_bd.cursor()
-
-        cursor.execute("SELECT id, nombre FROM recetas")
-        recetas = cursor.fetchall()
-
-        self.lista_recetas.delete(0, tk.END)
-
-        for receta in recetas:
-            self.lista_recetas.insert(tk.END, f"{receta[0]} - {receta[1]}")
-
-        conexion_bd.close()
-
-    # =========================
-    # USAR RECETA
-    # =========================
-    def usar_receta(self):
-        seleccion = self.lista_recetas.get(tk.ACTIVE)
-
-        if not seleccion:
-            messagebox.showerror("Error", "Selecciona una receta")
-            return
-
-        receta_id = int(seleccion.split(" - ")[0])
-
-        generar_lista_desde_receta(receta_id)
-
-        messagebox.showinfo("OK", "Lista de compras actualizada")
-
-        # Recargamos tabla automáticamente
-        self.cargar_lista()
+            messagebox.showerror("Error", f"No se pudo procesar la receta: {e}")
 
 
-    def marcar_seleccionado(self):
-        # Obtenemos elemento seleccionado
+# =========================
+# 🛒 LISTA COMPRA
+# =========================
+class ListaFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+
+        tk.Label(self, text="LISTA DE COMPRA PENDIENTE", font=("Arial", 18, "bold"), pady=10).pack()
+
+        tk.Button(self, text="⬅ Volver al Inicio", command=lambda: controller.show_frame(HomeFrame)).pack(pady=5)
+
+        columnas = ("ID", "Producto", "Cantidad", "Unidad")
+        self.tree = ttk.Treeview(self, columns=columnas, show="headings")
+
+        for col in columnas:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, anchor="center")
+
+        self.tree.pack(fill="both", expand=True, padx=20, pady=10)
+
+        btn_frame = tk.Frame(self)
+        btn_frame.pack()
+
+        tk.Button(btn_frame, text="🔄 Cargar Lista", command=self.cargar, width=15).grid(row=0, column=0, padx=5, pady=10)
+        tk.Button(btn_frame, text="✅ Marcar Comprado", bg="#4CAF50", fg="white", font=("Arial", 10, "bold"),
+                  command=self.marcar, width=15).grid(row=0, column=1, padx=5, pady=10)
+
+    def cargar(self):
+        datos = ver_tareas_todas()
+        for i in self.tree.get_children():
+            self.tree.delete(i)
+        for fila in datos:
+            self.tree.insert("", "end", values=fila)
+
+    def marcar(self):
         seleccion = self.tree.selection()
-
         if not seleccion:
-            messagebox.showerror("Error", "Selecciona un producto")
+            messagebox.showwarning("Atención", "Selecciona un producto de la lista.")
             return
 
-        # Obtenemos valores de la fila
         item = self.tree.item(seleccion)
         valores = item["values"]
 
-        item_id = valores[0]  # ID de lista_compras
+        marcar_comprado(valores[0])
 
-        # Marcamos como comprado
-        marcar_comprado(item_id)
+        messagebox.showinfo("Actualizado", f"{valores[1]} marcado como comprado.")
 
-        messagebox.showinfo("OK", "Producto marcado como comprado")
+        # 🔥 refresco automático inmediato
+        self.after(100, self.cargar)
 
-        # Refrescamos tabla
-        self.cargar_lista()
-
-        # =========================
-        # VER RECETAS
-        # =========================
-    def ver_recetas(self):
-        ventana = tk.Toplevel(self.root)
-        ventana.title("Recetas disponibles")
-        ventana.geometry("350x400")
-
-        recetas = obtener_recetas()
-
-        for receta_id, nombre in recetas:
-
-            frame = tk.Frame(ventana)
-            frame.pack(fill="x", pady=5)
-
-            # Nombre receta
-            tk.Label(frame, text=nombre).pack(side="left", padx=10)
-
-            # Botón preparar
-            tk.Button(
-                frame,
-                text="Preparar",
-                command=lambda r_id=receta_id: self.preparar_receta_ui(r_id)
-            ).pack(side="right", padx=10)
-
-
-    def preparar_receta_ui(self, receta_id):
-        try:
-            preparar_receta(receta_id)
-            messagebox.showinfo("OK", "Receta preparada correctamente")
-
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo preparar: {e}")
-
-    def cargar_inventario(self):
-        datos = ver_inventario()
-
-        for item in self.tree_inventario.get_children():
-            self.tree_inventario.delete(item)
-
-        for fila in datos:
-            self.tree_inventario.insert("", "end", values=fila)
-
-    def mostrar_compras(self):
-        self.tree_inventario.pack_forget()
-        self.tree.pack(fill="both", expand=True)
-        self.cargar_lista()
-
-
-    def mostrar_inventario(self):
-        self.tree.pack_forget()
-        self.tree_inventario.pack(fill="both", expand=True)
-        self.cargar_inventario()
-
+# =========================
+# EJECUCIÓN
+# =========================
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = App(root)
-    root.mainloop()
+    app = App()
+    app.mainloop()

@@ -20,6 +20,9 @@ class LoginApp:
 
         tk.Button(root, text="Iniciar sesión", command=self.login).pack(pady=10)
         tk.Button(root, text="Registrarse", command=self.abrir_registro).pack()
+   
+   
+   
     def login(self):
         email = self.email_entry.get()
         password = self.password_entry.get()
@@ -29,14 +32,14 @@ class LoginApp:
         if usuario:
             messagebox.showinfo("OK", f"Bienvenido {usuario[1]}")
 
-            self.root.destroy()
+            self.root.destroy()  # Cerramos la ventana de login
 
-            root = tk.Tk()
-            App(root)
-            root.mainloop()
+            app = App()          # Creamos la ventana principal
+            app.mainloop()
 
         else:
             messagebox.showerror("Error", "Credenciales incorrectas")
+    
     def abrir_registro(self):
         ventana = tk.Toplevel(self.root)
         ventana.title("Registro")
@@ -68,6 +71,5 @@ class LoginApp:
         tk.Button(ventana, text="Crear cuenta", command=registrar).pack(pady=10)
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    LoginApp(root)
-    root.mainloop()
+    app = App()
+    app.mainloop()
