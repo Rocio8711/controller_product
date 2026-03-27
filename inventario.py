@@ -31,3 +31,16 @@ def verificar_stock_minimo():
 
     conexion_db.commit()
     conexion_db.close()
+
+def ver_inventario():
+    conn = conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id, nombre, cantidad, unidad, stock_minimo
+        FROM productos
+    """)
+
+    datos = cursor.fetchall()
+    conn.close()
+    return datos

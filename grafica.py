@@ -4,6 +4,7 @@ from lista_compra import marcar_comprado, ver_tareas_todas
 from recetas import generar_lista_desde_receta, obtener_recetas   # 👈 IMPORTANTE
 from acceso_base_datos import conexion
 from recetas import obtener_recetas, preparar_receta
+from inventario import ver_inventario
 
 class App:
     def __init__(self, root):
@@ -19,7 +20,8 @@ class App:
 
         tk.Button(frame_botones, text="Cargar lista", command=self.cargar_lista).pack(side="left", padx=5)
         tk.Button(frame_botones, text="Marcar comprado", command=self.marcar_seleccionado).pack(side="left", padx=5)
-        tk.Button(frame_botones, text="Ver recetas", command=self.ver_recetas).pack(side="left", padx=5)
+        tk.Button(frame_botones, text="Ver lista compras", command=self.mostrar_compras).pack(side="left", padx=5)
+        tk.Button(frame_botones, text="Ver inventario", command=self.mostrar_inventario).pack(side="left", padx=5)
 
         # =========================
         # TABLA (CENTRO)
@@ -37,6 +39,25 @@ class App:
 
         self.tree.pack(fill="both", expand=True)
 
+
+
+        #ver inventario
+        self.tree_inventario = ttk.Treeview(
+            root,
+            columns=("ID", "Producto", "Cantidad", "Unidad", "Min"),
+            show="headings"
+        )
+
+        self.tree_inventario.heading("ID", text="ID")
+        self.tree_inventario.heading("Producto", text="Producto")
+        self.tree_inventario.heading("Cantidad", text="Cantidad")
+        self.tree_inventario.heading("Unidad", text="Unidad")
+        self.tree_inventario.heading("Min", text="Stock mínimo")
+
+        # 👇 NO SE MUESTRA AL INICIO
+        self.tree_inventario.pack_forget()
+
+
         # =========================
         # FRAME RECETAS (ABAJO)
         # =========================
@@ -53,6 +74,8 @@ class App:
         # CARGAMOS RECETAS
         self.cargar_recetas()
 
+        #  ESTO ES CLAVE
+        self.mostrar_compras()
     # =========================
     # CARGAR LISTA COMPRAS
     # =========================
@@ -165,7 +188,25 @@ class App:
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo preparar: {e}")
 
+    def cargar_inventario(self):
+        datos = ver_inventario()
 
+        for item in self.tree_inventario.get_children():
+            self.tree_inventario.delete(item)
+
+        for fila in datos:
+            self.tree_inventario.insert("", "end", values=fila)
+
+    def mostrar_compras(self):
+        self.tree_inventario.pack_forget()
+        self.tree.pack(fill="both", expand=True)
+        self.cargar_lista()
+
+
+    def mostrar_inventario(self):
+        self.tree.pack_forget()
+        self.tree_inventario.pack(fill="both", expand=True)
+        self.cargar_inventario()
 
 if __name__ == "__main__":
     root = tk.Tk()
