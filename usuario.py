@@ -15,6 +15,22 @@ def login(email, contrasena):
     conn.close()
 
     return usuario
+def agregar_usuario(nombre, email, contrasena):
+    conn = conexion()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+    if cursor.fetchone():
+        print("El usuario ya existe")
+        conn.close()
+        return
+
+    cursor.execute(
+        "INSERT INTO usuarios (nombre, email, contrasena) VALUES (?, ?, ?)",
+        (nombre, email, contrasena)
+    )
+    conn.commit()
+
 
 '''def agregar_usuario(nombre,email,contrasena):
     conexion_bd = conexion()
