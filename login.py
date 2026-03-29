@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import simpledialog
 from usuario import login as login_bd
 from grafica import App
 
@@ -30,7 +31,7 @@ class LoginApp:
         usuario = login_bd(email, password)
 
         if usuario:
-            messagebox.showinfo("OK", f"Bienvenido {usuario[1]}")
+            messagebox.showinfo("OK", f"Bienvenid@ {usuario[1].capitalize()}")
 
             self.root.destroy()  # Cerramos la ventana de login
 
@@ -41,6 +42,14 @@ class LoginApp:
             messagebox.showerror("Error", "Credenciales incorrectas")
     
     def abrir_registro(self):
+        clave = simpledialog.askstring("Clave requerida", "Introduce la clave del gestor:", show="*")
+
+        CLAVE_GESTOR = "12345"  # cámbiala por la que quieras
+
+        if clave != CLAVE_GESTOR:
+            messagebox.showerror("Error", "Clave incorrecta")
+            return
+
         ventana = tk.Toplevel(self.root)
         ventana.title("Registro")
         ventana.geometry("300x250")
@@ -69,7 +78,6 @@ class LoginApp:
             ventana.destroy()
 
         tk.Button(ventana, text="Crear cuenta", command=registrar).pack(pady=10)
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()

@@ -75,7 +75,7 @@ class HomeFrame(tk.Frame):
         # Título
         tk.Label(
             contenido,
-            text="SMART KITCHEN",
+            text="CONTROLLER PRODUCT",
             font=("Arial", 26, "bold"),
             fg="#2E7D32"
         ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
