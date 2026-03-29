@@ -1,39 +1,75 @@
 from acceso_base_datos import conexion
 
 
+# =========================
+# ⚠️ VERIFICAR STOCK MÍNIMO
+# =========================
 def verificar_stock_minimo():
-    conexion_db = conexion()
-    if not conexion_db:
+    conn = conexion()
+    if not conn:
         return
 
-    cursor = conexion_db.cursor()
-    
-    # seleccionamos los productos bajo stock minimo
-    cursor.execute("SELECT id, nombre, cantidad, stock_minimo, unidad FROM productos WHERE cantidad < stock_minimo")
-    productos_bajo_stock = cursor.fetchall()
-    
-    for producto in productos_bajo_stock:
-        producto_id, nombre, cantidad, stock_minimo, unidad = producto
-        cantidad_a_comprar = stock_minimo - cantidad
-        
-        # comprobamos si el producto ya lo tenemos en la lista
-        cursor.execute("SELECT id FROM lista_compras WHERE producto_id = ?", (producto_id,))
-        resultado = cursor.fetchone()
-        
-        if resultado:
-            # actualizamos las cantidades
-            cursor.execute("UPDATE lista_compras SET cantidad = ? WHERE producto_id = ?", (cantidad_a_comprar, producto_id))
-        else:
-            # insertamos el ingrediente
-            cursor.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad) VALUES (?, ?, ?)", (producto_id, cantidad_a_comprar, unidad))
-        
-        print(f"Producto '{nombre}' añadido a la lista de compras: {cantidad_a_comprar} {unidad}")
+    cursor = conn.cursor()
 
-    conexion_db.commit()
-    conexion_db.close()
+    try:
+        # Productos por debajo del mínimo
+        cursor.execute("""
+            SELECT id, nombre, cantidad, stock_minimo, unidad
+            FROM productos
+            WHERE cantidad < stock_minimo
+        """)
 
+        productos_bajo_stock = cursor.fetchall()
+
+        for producto_id, nombre, cantidad, stock_minimo, unidad in productos_bajo_stock:
+            cantidad_a_comprar = stock_minimo - cantidad
+
+            # 🔥 IMPORTANTE: solo mirar pendientes (comprado = 0)
+            cursor.execute("""
+                SELECT id, cantidad 
+                FROM lista_compras 
+                WHERE producto_id = ? AND comprado = 0
+            """, (producto_id,))
+
+            resultado = cursor.fetchone()
+
+            if resultado:
+                lista_id, cantidad_existente = resultado
+
+                # 🔥 SUMAR en vez de sobrescribir (evita perder datos)
+                cursor.execute("""
+                    UPDATE lista_compras
+                    SET cantidad = cantidad + ?
+                    WHERE id = ?
+                """, (cantidad_a_comprar, lista_id))
+
+            else:
+                # Insertar nuevo en lista
+                cursor.execute("""
+                    INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
+                    VALUES (?, ?, ?, 0)
+                """, (producto_id, cantidad_a_comprar, unidad))
+
+            print(f"Producto '{nombre}' añadido a la lista: {cantidad_a_comprar} {unidad}")
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        print("Error verificando stock mínimo:", e)
+
+    finally:
+        conn.close()
+
+
+# =========================
+# 📦 VER INVENTARIO
+# =========================
 def ver_inventario():
     conn = conexion()
+    if not conn:
+        return []
+
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -43,4 +79,5 @@ def ver_inventario():
 
     datos = cursor.fetchall()
     conn.close()
+
     return datos

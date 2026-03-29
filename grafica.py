@@ -12,6 +12,10 @@ from recetas import (
 from inventario import ver_inventario
 from acceso_base_datos import conexion
 
+
+# =========================
+# 🧠 APP PRINCIPAL
+# =========================
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -19,15 +23,50 @@ class App(tk.Tk):
         self.title("SmartKitchen Inventory")
         self.geometry("800x600")
 
+        self.modo_oscuro = True
 
-        # 🎨 ESTILOS GENERALES (Treeview + cabeceras)
-        style = ttk.Style(self)
+        self.style = ttk.Style(self)
+        self.style.theme_use("clam")
 
-        # Tema necesario para que funcionen los colores
-        style.theme_use("clam")
+        self._set_global_colors()
+
+        container = tk.Frame(self, bg=self.bg_app)
+        container.pack(fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(HomeFrame)
+
+    def _set_global_colors(self):
+        self.bg_app = "#121212" if self.modo_oscuro else "#F0F0F0"
+        self.fg_app = "white" if self.modo_oscuro else "black"
+
+    def toggle_modo_oscuro(self):
+        self.modo_oscuro = not self.modo_oscuro
+        self._set_global_colors()
+
+        for frame in self.frames.values():
+            if hasattr(frame, "_setup_ui"):
+                frame._setup_ui()
+
+    def show_frame(self, frame_class):
+        frame = self.frames[frame_class]
+        frame.tkraise()
+        self.after(50, self._refresh_frame, frame)
+
+    def _refresh_frame(self, frame):
+        if hasattr(frame, "cargar"):
+            frame.cargar()
+
 
         # 🔹 Cabeceras
-        style.configure("Treeview.Heading",
+        self.style.configure("Treeview.Heading",
             font=("Segoe UI", 11, "bold"),
             background="#2E7D32",
             foreground="white",
@@ -36,12 +75,12 @@ class App(tk.Tk):
         )
 
         # Hover en cabecera
-        style.map("Treeview.Heading",
+        self.style.map("Treeview.Heading",
             background=[("active", "#388E3C")]
         )
 
         # 🔹 Tabla
-        style.configure("Treeview",
+        self.style.configure("Treeview",
             background="#ffffff",
             foreground="black",
             rowheight=28,
@@ -50,90 +89,86 @@ class App(tk.Tk):
         )
 
         # Selección
-        style.map("Treeview",
+        self.style.map("Treeview",
             background=[("selected", "#A5D6A7")],
             foreground=[("selected", "black")]
         )
-
-
-
-        # Contenedor principal para los frames
-        container = tk.Frame(self)
-        container.pack(fill="both", expand=True)
-
-        # Configuración de pesos para que los frames hijos se expandan
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames = {}
-
-        # Inicialización de todos los frames
-        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame):
-            frame = F(container, self)
-            self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame(HomeFrame)
-
-    '''def show_frame(self, frame_class):
-        """Muestra el frame solicitado elevándolo al frente"""
-        frame = self.frames[frame_class]
-        frame.tkraise()'''
-
-
-    def show_frame(self, frame_class):
-        frame = self.frames[frame_class]
-        frame.tkraise()
-
-        # 🔥 ejecutar después de que Tkinter renderice la pantalla
-        self.after(50, self._refresh_frame, frame)
-
-    def _refresh_frame(self, frame):
-        if hasattr(frame, "cargar"):
-            # evitar doble ejecución accidental
-            if not getattr(frame, "_cargando", False):
-                frame._cargando = True
-                frame.cargar()
-                frame._cargando = False
-
+# =========================
+# 🏠 HOME
+# =========================
 # =========================
 # 🏠 HOME
 # =========================
 class HomeFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        self.controller = controller
+        
+        # Guardaremos una referencia al logo para que el Garbage Collector no la borre
+        self.logo_img = None
+        
+        # Dibujamos la interfaz por primera vez
+        self._setup_ui()
 
-        # Centrar contenido
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+    def _setup_ui(self):
+        """Configura y dibuja todos los widgets de la interfaz"""
+        modo = self.controller.modo_oscuro
+        
+        # Definición de colores según el modo
+        bg_color = "#121212" if modo else "#F0F0F0"
+        fg_color = "white" if modo else "black"
+        btn_bg = "#388E3C" if modo else "#4CAF50"
+        btn_active = "#66BB6A" if modo else "#45a049"
 
-        contenido = tk.Frame(self)
-        contenido.grid(row=0, column=0)
+        # 1. Limpiar el frame antes de redibujar (para el toggle)
+        for widget in self.winfo_children():
+            widget.destroy()
 
-        # Título
+        self.configure(bg=bg_color)
+
+        # 2. Botón de Toggle (Modo Oscuro/Claro)
+        # Usamos un color de fondo que contraste o el mismo del sistema
+        self.toggle_btn = tk.Button(
+            self,
+            text="☀️" if modo else "🌙",
+            command=self.toggle_modo_oscuro,
+            bg=bg_color,
+            fg=fg_color,
+            activebackground=bg_color,
+            activeforeground=fg_color,
+            font=("Segoe UI Emoji", 14),
+            bd=0,
+            cursor="hand2"
+        )
+        self.toggle_btn.place(relx=0.95, rely=0.02, anchor="ne")
+
+        # 3. Contenedor principal centrado
+        contenido = tk.Frame(self, bg=bg_color)
+        contenido.place(relx=0.5, rely=0.5, anchor="center")
+
+        # 4. Título
         tk.Label(
             contenido,
             text="CONTROLLER PRODUCT",
             font=("Arial", 26, "bold"),
-            fg="#2E7D32"
-        ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
+            fg="#2E7D32", # Mantenemos el verde corporativo
+            bg=bg_color
+        ) .grid(row=0, column=0, columnspan=2, pady=(0, 30))
 
-        # Imagen de Logo
-        try:
-            # Asegúrate de que esta ruta sea correcta en tu PC
-            image = Image.open(r"C:\Users\sienr\Documents\Proyecto_ControllerProduct\logo.jpeg")
-            image = image.resize((180, 180))
-            controller.logo_img = ImageTk.PhotoImage(image)
-            tk.Label(contenido, image=controller.logo_img).grid(row=1, column=0, padx=40)
-        except Exception:
-            tk.Label(contenido, text="[Logo no encontrado]", fg="red", font=("Arial", 12)).grid(row=1, column=0, padx=40)
+        # 5. Imagen de Logo
+        self.logo_label = tk.Label(contenido, bg=bg_color)
+        self.logo_label.grid(row=1, column=0, padx=40)
+        self._load_logo()
 
-        # Botones de navegación
+        # 6. Botones de navegación
+        frame_botones = tk.Frame(contenido, bg=bg_color)
+        frame_botones.grid(row=1, column=1, padx=40)
+
         boton_estilo = {
             "font": ("Arial", 14, "bold"),
-            "bg": "#4CAF50",
+            "bg": btn_bg,
             "fg": "white",
-            "activebackground": "#45a049",
+            "activebackground": btn_active,
             "activeforeground": "white",
             "width": 20,
             "bd": 0,
@@ -141,48 +176,90 @@ class HomeFrame(tk.Frame):
             "pady": 10
         }
 
-        frame_botones = tk.Frame(contenido)
-        frame_botones.grid(row=1, column=1, padx=40)
+        # Creamos los botones con sus comandos
+        tk.Button(
+            frame_botones, 
+            text="📦 Inventario", 
+            command=lambda: self.controller.show_frame(InventarioFrame), 
+            **boton_estilo
+        ).pack(pady=10)
 
-        tk.Button(frame_botones, text="📦 Inventario", command=lambda: controller.show_frame(InventarioFrame), **boton_estilo).pack(pady=10)
-        tk.Button(frame_botones, text="🍳 Recetas", command=lambda: controller.show_frame(RecetasFrame), **boton_estilo).pack(pady=10)
-        tk.Button(frame_botones, text="🛒 Lista de compra", command=lambda: controller.show_frame(ListaFrame), **boton_estilo).pack(pady=10)
+        tk.Button(
+            frame_botones, 
+            text="🍳 Recetas", 
+            command=lambda: self.controller.show_frame(RecetasFrame), 
+            **boton_estilo
+        ).pack(pady=10)
+
+        tk.Button(
+            frame_botones, 
+            text="🛒 Lista de compra", 
+            command=lambda: self.controller.show_frame(ListaFrame), 
+            **boton_estilo
+        ).pack(pady=10)
+
+    def _load_logo(self):
+        """Carga la imagen del logo"""
+        try:
+            # Ruta absoluta que proporcionaste
+            path = r"C:\Users\sienr\Documents\Proyecto_ControllerProduct\logo.jpeg"
+            image = Image.open(path)
+            image = image.resize((180, 180))
+            self.logo_img = ImageTk.PhotoImage(image)
+            self.logo_label.config(image=self.logo_img)
+        except Exception as e:
+            print(f"Error cargando logo: {e}")
+            self.logo_label.config(
+                text="[Logo no encontrado]", 
+                fg="red", 
+                font=("Arial", 12)
+            )
+
+    def toggle_modo_oscuro(self):
+        """Cambia el estado en el controlador y refresca la UI del Frame"""
+        self.controller.toggle_modo_oscuro()
+        self._setup_ui()
 
 
+# =========================
+# 📦 INVENTARIO
+# =========================
 # =========================
 # 📦 INVENTARIO
 # =========================
 class InventarioFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        self.controller = controller
 
-        # 🎨 Fondo general
-        self.configure(bg="#E8F5E9")
+        # Creamos la interfaz
+        self.setup_ui()
+        # Aplicamos colores
+        self.actualizar_colores()
 
+    def setup_ui(self):
         # 🔹 Título
-        tk.Label(
+        self.label_titulo = tk.Label(
             self,
             text="📦 INVENTARIO DE PRODUCTOS",
-            font=("Arial", 20, "bold"),
-            bg="#E8F5E9",
-            fg="#1B5E20"
-        ).pack(pady=15)
+            font=("Arial", 20, "bold")
+        )
+        self.label_titulo.pack(pady=15)
 
         # 🔹 Botón volver
-        tk.Button(
+        self.btn_volver = tk.Button(
             self,
             text="⬅ Volver al Inicio",
-            bg="#A5D6A7",
-            fg="black",
             font=("Arial", 10, "bold"),
             bd=0,
             padx=10,
             pady=5,
             cursor="hand2",
-            command=lambda: controller.show_frame(HomeFrame)
-        ).pack(pady=5)
+            command=lambda: self.controller.show_frame(HomeFrame)
+        )
+        self.btn_volver.pack(pady=5)
 
-        # 🔹 Tabla
+        # 🔹 Tabla (Treeview)
         columnas = ("ID", "Producto", "Cantidad", "Unidad", "Min")
         self.tree = ttk.Treeview(self, columns=columnas, show="headings")
 
@@ -191,54 +268,30 @@ class InventarioFrame(tk.Frame):
             self.tree.column(col, anchor="center", width=120)
 
         self.tree.pack(fill="both", expand=True, padx=20, pady=15)
+        
 
-
-        # 🔹 Menú contextual (clic derecho) con estilo
-        self.menu = tk.Menu(
-            self,
-            tearoff=0,
-            bg="#F1F8E9",
-            fg="#1B5E20",
-            activebackground="#81C784",
-            activeforeground="black",
-            font=("Segoe UI", 10, "bold"),
-            bd=0
-        )
-
-        self.menu.add_command(label="➕  Añadir producto", command=self.abrir_agregar)
-        self.menu.add_command(label="✏️  Editar producto", command=self.modificar_producto)
+        # 🔹 Menú contextual
+        self.menu = tk.Menu(self, tearoff=0, font=("Segoe UI", 10, "bold"), bd=0)
+        self.menu.add_command(label="➕   Añadir producto", command=self.abrir_agregar)
+        self.menu.add_command(label="✏️   Editar producto", command=self.modificar_producto)
         self.menu.add_separator()
-        self.menu.add_command(label="🗑️  Eliminar producto", command=self.eliminar_producto)
+        self.menu.add_command(label="🗑️   Eliminar producto", command=self.eliminar_producto)
 
         self.tree.bind("<Button-3>", self.mostrar_menu)
 
-        # 🔹 Frame de botones
-        frame_acciones = tk.Frame(self, bg="#E8F5E9")
-        frame_acciones.pack(pady=10)
+        # 🔹 Frame de botones de acción
+        self.frame_acciones = tk.Frame(self)
+        self.frame_acciones.pack(pady=10)
 
-        def crear_boton(texto, comando, color):
-            return tk.Button(
-                frame_acciones,
-                text=texto,
-                command=comando,
-                bg=color,
-                fg="white",
-                font=("Arial", 10, "bold"),
-                bd=0,
-                padx=10,
-                pady=6,
-                cursor="hand2"
-            )
-
-        crear_boton("➕ Añadir", self.abrir_agregar, "#4CAF50").pack(side="left", padx=5)
-        crear_boton("✏️ Modificar", self.modificar_producto, "#FF9800").pack(side="left", padx=5)
-        crear_boton("❌ Eliminar", self.eliminar_producto, "#F44336").pack(side="left", padx=5)
+        # Botones inferiores con sus comandos
+        tk.Button(self.frame_acciones, text="➕ Añadir", command=self.abrir_agregar, bg="#4CAF50", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
+        tk.Button(self.frame_acciones, text="✏️ Modificar", command=self.modificar_producto, bg="#FF9800", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
+        tk.Button(self.frame_acciones, text="❌ Eliminar", command=self.eliminar_producto, bg="#F44336", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
 
         # 🔹 Botón cargar datos
-        tk.Button(
+        self.btn_cargar = tk.Button(
             self,
             text="🔄 Cargar Datos",
-            bg="#2196F3",
             fg="white",
             font=("Arial", 11, "bold"),
             bd=0,
@@ -246,128 +299,122 @@ class InventarioFrame(tk.Frame):
             pady=6,
             cursor="hand2",
             command=self.cargar
-        ).pack(pady=10)
+        )
+        self.btn_cargar.pack(pady=10)
 
+    def actualizar_colores(self):
+        """Aplica los colores dependiendo de si el modo oscuro está activo"""
+        modo = self.controller.modo_oscuro
+        bg_main = "#121212" if modo else "#E8F5E9"
+        bg_card = "#1E1E1E" if modo else "#F1F8E9"
+        fg_text = "#FFFFFF" if modo else "#1B5E20"
 
+        self.configure(bg=bg_main)
+        self.label_titulo.config(bg=bg_main, fg="#4CAF50" if modo else "#1B5E20")
+        self.btn_volver.config(bg="#333333" if modo else "#A5D6A7", fg="white" if modo else "black")
+        self.frame_acciones.config(bg=bg_main)
+        self.btn_cargar.config(bg="#1976D2" if modo else "#2196F3")
+        self.menu.config(bg=bg_card, fg=fg_text, activebackground="#4CAF50")
+        self.tree.tag_configure("filTab", background="#C0BABA" if modo else "#ffffff")
+
+    # --- LÓGICA DE DATOS ---
     def cargar(self):
         datos = ver_inventario()
         for i in self.tree.get_children():
             self.tree.delete(i)
         for fila in datos:
-            self.tree.insert("", "end", values=fila)
+            self.tree.insert("", "end", values=fila,tags=("filTab",))
 
     def mostrar_menu(self, event):
         try:
-            self.tree.selection_set(self.tree.identify_row(event.y))
-            self.menu.post(event.x_root, event.y_root)
+            row = self.tree.identify_row(event.y)
+            if row:
+                self.tree.selection_set(row)
+                self.menu.post(event.x_root, event.y_root)
         except:
             pass
 
     def abrir_agregar(self):
         ventana = tk.Toplevel(self)
         ventana.title("Nuevo producto")
+        modo = self.controller.modo_oscuro
+        ventana.configure(bg="#1E1E1E" if modo else "#F0F0F0")
 
-        tk.Label(ventana, text="Nombre").pack()
-        nombre = tk.Entry(ventana)
-        nombre.pack()
+        def crear_entry(label_text):
+            tk.Label(ventana, text=label_text, bg=ventana["bg"], fg="white" if modo else "black").pack(pady=(5,0))
+            e = tk.Entry(ventana)
+            e.pack(pady=5, padx=20)
+            return e
 
-        tk.Label(ventana, text="Cantidad").pack()
-        cantidad = tk.Entry(ventana)
-        cantidad.pack()
-
-        tk.Label(ventana, text="Unidad").pack()
-        unidad = tk.Entry(ventana)
-        unidad.pack()
-
-        tk.Label(ventana, text="Stock mínimo").pack()
-        minimo = tk.Entry(ventana)
-        minimo.pack()
+        nombre = crear_entry("Nombre")
+        cantidad = crear_entry("Cantidad")
+        unidad = crear_entry("Unidad")
+        minimo = crear_entry("Stock mínimo")
 
         def guardar():
             conn = conexion()
             cursor = conn.cursor()
-
-            cursor.execute("""
-                INSERT INTO productos (nombre, cantidad, unidad, stock_minimo)
-                VALUES (?, ?, ?, ?)
-            """, (nombre.get(), cantidad.get(), unidad.get(), minimo.get()))
-
+            cursor.execute("INSERT INTO productos (nombre, cantidad, unidad, stock_minimo) VALUES (?,?,?,?)",
+                           (nombre.get(), cantidad.get(), unidad.get(), minimo.get()))
             conn.commit()
             conn.close()
-
             ventana.destroy()
             self.cargar()
 
-        tk.Button(ventana, text="Guardar", command=guardar).pack(pady=10)
-    
-    
+        tk.Button(ventana, text="Guardar", bg="#4CAF50", fg="white", command=guardar).pack(pady=15)
+
     def eliminar_producto(self):
         seleccion = self.tree.selection()
-
         if not seleccion:
             messagebox.showwarning("Error", "Selecciona un producto")
             return
-
-        item = self.tree.item(seleccion)
-        producto_id = item["values"][0]
-
-        conn = conexion()
-        cursor = conn.cursor()
-
-        cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
-        conn.commit()
-        conn.close()
-
-        self.cargar()
-
+        
+        producto_id = self.tree.item(seleccion)["values"][0]
+        if messagebox.askyesno("Confirmar", "¿Eliminar este producto?"):
+            conn = conexion()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
+            conn.commit()
+            conn.close()
+            self.cargar()
 
     def modificar_producto(self):
         seleccion = self.tree.selection()
-
         if not seleccion:
             messagebox.showwarning("Error", "Selecciona un producto")
             return
 
         item = self.tree.item(seleccion)
-        producto_id, nombre_actual, cantidad_actual, unidad_actual, minimo_actual = item["values"]
+        p_id, n_act, c_act, u_act, m_act = item["values"]
 
         ventana = tk.Toplevel(self)
         ventana.title("Modificar producto")
+        modo = self.controller.modo_oscuro
+        ventana.configure(bg="#1E1E1E" if modo else "#F0F0F0")
 
-        nombre = tk.Entry(ventana)
-        nombre.insert(0, nombre_actual)
-        nombre.pack()
+        def crear_entry(label_text, valor_inicial):
+            tk.Label(ventana, text=label_text, bg=ventana["bg"], fg="white" if modo else "black").pack(pady=(5,0))
+            e = tk.Entry(ventana)
+            e.insert(0, valor_inicial)
+            e.pack(pady=5, padx=20)
+            return e
 
-        cantidad = tk.Entry(ventana)
-        cantidad.insert(0, cantidad_actual)
-        cantidad.pack()
-
-        unidad = tk.Entry(ventana)
-        unidad.insert(0, unidad_actual)
-        unidad.pack()
-
-        minimo = tk.Entry(ventana)
-        minimo.insert(0, minimo_actual)
-        minimo.pack()
+        enombre = crear_entry("Nombre", n_act)
+        ecantidad = crear_entry("Cantidad", c_act)
+        eunidad = crear_entry("Unidad", u_act)
+        eminimo = crear_entry("Stock mínimo", m_act)
 
         def guardar():
             conn = conexion()
             cursor = conn.cursor()
-
-            cursor.execute("""
-                UPDATE productos
-                SET nombre=?, cantidad=?, unidad=?, stock_minimo=?
-                WHERE id=?
-            """, (nombre.get(), cantidad.get(), unidad.get(), minimo.get(), producto_id))
-
+            cursor.execute("UPDATE productos SET nombre=?, cantidad=?, unidad=?, stock_minimo=? WHERE id=?",
+                           (enombre.get(), ecantidad.get(), eunidad.get(), eminimo.get(), p_id))
             conn.commit()
             conn.close()
-
             ventana.destroy()
             self.cargar()
 
-        tk.Button(ventana, text="Guardar cambios", command=guardar).pack(pady=10)
-
+        tk.Button(ventana, text="Guardar cambios", bg="#FF9800", fg="white", command=guardar).pack(pady=15)
 
 # =========================
 # 🍳 RECETAS
