@@ -238,13 +238,36 @@ class InventarioFrame(tk.Frame):
         self.actualizar_colores()
 
     def setup_ui(self):
+
+        modo = self.controller.modo_oscuro
+
+        # 🌙 --- BOTÓN MODO OSCURO (CORREGIDO) ---
+        # Definimos primero el color para que nazca bien
+        bg_init = "#121212" if modo else "#E8F5E9"
+        fg_init = "white" if modo else "black"
+
+        # Lo guardamos como self.toggle_btn para poder configuarlo luego
+        self.toggle_btn = tk.Button(
+            self,
+            text="☀️" if modo else "🌙",
+            command=self.alternar_modo, # Necesitamos esta función (ver abajo)
+            font=("Segoe UI Emoji", 14),
+            bd=0, # Sin borde de relieve
+            highlightthickness=0, # <--- ¡ESTA ES LA LÍNEA CLAVE! (Quita el recuadro blanco)
+            cursor="hand2",
+            bg=bg_init,
+            fg=fg_init,
+            activebackground=bg_init, # Color al hacer clic
+            activeforeground=fg_init
+        )
+        self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
+
         # 🔹 Título
         self.label_titulo = tk.Label(
             self,
             text="📦 INVENTARIO DE PRODUCTOS",
             font=("Arial", 20, "bold")
         )
-        self.label_titulo.pack(pady=15)
 
         # 🔹 Botón volver
         self.btn_volver = tk.Button(
@@ -302,12 +325,15 @@ class InventarioFrame(tk.Frame):
         )
         self.btn_cargar.pack(pady=10)
 
+
     def actualizar_colores(self):
         """Aplica los colores dependiendo de si el modo oscuro está activo"""
         modo = self.controller.modo_oscuro
         bg_main = "#121212" if modo else "#E8F5E9"
+        fg_text = "white" if modo else "black"
         bg_card = "#1E1E1E" if modo else "#F1F8E9"
-        fg_text = "#FFFFFF" if modo else "#1B5E20"
+
+
 
         self.configure(bg=bg_main)
         self.label_titulo.config(bg=bg_main, fg="#4CAF50" if modo else "#1B5E20")
@@ -316,6 +342,31 @@ class InventarioFrame(tk.Frame):
         self.btn_cargar.config(bg="#1976D2" if modo else "#2196F3")
         self.menu.config(bg=bg_card, fg=fg_text, activebackground="#4CAF50")
         self.tree.tag_configure("filTab", background="#C0BABA" if modo else "#ffffff")
+        
+        self.toggle_btn.config(bg=bg_main, fg=fg_text, activebackground=bg_main)
+
+
+
+    def alternar_modo(self):
+            """Cambia el modo en el controlador y actualiza este botón inmediatamente"""
+            self.controller.toggle_modo_oscuro()
+            modo = self.controller.modo_oscuro
+            
+            # Colores inmediatos para el botón
+            bg_actual = "#121212" if modo else "#E8F5E9"
+            fg_actual = "white" if modo else "black"
+
+            # Actualizamos el botón aquí mismo
+            self.toggle_btn.config(
+                text="☀️" if modo else "🌙",
+                bg=bg_actual,
+                fg=fg_actual,
+                activebackground=bg_actual,
+                activeforeground=fg_actual
+            )
+            
+            # Luego mandamos a actualizar el resto de la pantalla
+            self.actualizar_colores()
 
     # --- LÓGICA DE DATOS ---
     def cargar(self):
@@ -409,6 +460,9 @@ class InventarioFrame(tk.Frame):
             cursor = conn.cursor()
             cursor.execute("UPDATE productos SET nombre=?, cantidad=?, unidad=?, stock_minimo=? WHERE id=?",
                            (enombre.get(), ecantidad.get(), eunidad.get(), eminimo.get(), p_id))
+            
+            if eminimo.get()<ecantidad.get():
+                cursor.execute("select * from")
             conn.commit()
             conn.close()
             ventana.destroy()
