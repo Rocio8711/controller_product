@@ -282,15 +282,32 @@ class InventarioFrame(tk.Frame):
         )
         self.btn_volver.pack(pady=5)
 
-        # 🔹 Tabla (Treeview)
+        # ---------------------------------------------------------
+        # 📂 CONTENEDOR DE TABLA + SCROLLBAR
+        # ---------------------------------------------------------
+        self.frame_tabla = tk.Frame(self, bg=bg_init)
+        self.frame_tabla.pack(fill="both", expand=True, padx=20, pady=15)
+
+        # Crear Scrollbar
+        self.scrollbar = ttk.Scrollbar(self.frame_tabla, orient="vertical")
+        self.scrollbar.pack(side="right", fill="y")
+
+        # Crear Tabla (Treeview) conectada al scroll
         columnas = ("ID", "Producto", "Cantidad", "Unidad", "Min")
-        self.tree = ttk.Treeview(self, columns=columnas, show="headings")
+        self.tree = ttk.Treeview(
+            self.frame_tabla, 
+            columns=columnas, 
+            show="headings",
+            yscrollcommand=self.scrollbar.set # Conecta la tabla al scroll
+        )
+        
+        # Configurar el scroll para que mueva la tabla
+        self.scrollbar.config(command=self.tree.yview)
 
         for col in columnas:
             self.tree.heading(col, text=col)
             self.tree.column(col, anchor="center", width=120)
-
-        self.tree.pack(fill="both", expand=True, padx=20, pady=15)
+        self.tree.pack(side="left", fill="both", expand=True)
         
 
         # 🔹 Menú contextual
@@ -462,7 +479,13 @@ class InventarioFrame(tk.Frame):
                            (enombre.get(), ecantidad.get(), eunidad.get(), eminimo.get(), p_id))
             
             if eminimo.get()<ecantidad.get():
-                cursor.execute("select * from")
+                cursor.execute("select * from lista_compras where producto_id=? and comprado=0",(p_id,))
+                resultado=cursor.fetchall()
+                if resultado:
+                    cursor.execute("UPDATE lista_compras SET cantidad=? WHERE id=?",
+                           (float(eminimo.get())-float(ecantidad.get()),resultado[0][0]))
+                else:
+                    cursor.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, ?)", (p_id, float(eminimo.get()) - float(ecantidad.get()), eunidad.get(), 0))           
             conn.commit()
             conn.close()
             ventana.destroy()
