@@ -225,7 +225,14 @@ class RecetasFrame(tk.Frame):
         """, (receta_id,))
 
         for f in cur.fetchall():
-            self.tree_ing.insert("", "end", values=f[:3], tags=(f[3],))
+            # Redondeamos la cantidad a 2 decimales antes de mostrarla
+            try:
+                cantidad_limpia = round(float(f[1]), 2)
+            except:
+                cantidad_limpia = f[1] # Si no es número, lo dejamos como está
+            
+            # Insertamos los valores con la cantidad ya redondeada
+            self.tree_ing.insert("", "end", values=(f[0], cantidad_limpia, f[2]), tags=(f[3],))
 
         conn.close()
 
@@ -350,24 +357,86 @@ class RecetasFrame(tk.Frame):
         nombre_receta = self.tree.item(sel[0])["values"][1]
 
         try:
-            # 1. Tu lógica de recetas.py: Generar lista de compra inteligente
-            # (Solo añade lo que falta según el stock real)
-            generar_lista_desde_receta(rid)
-
-            # 2. Registrar en el Planificador (recetas_pendientes)
             conn = conexion()
             cur = conn.cursor()
+
+            # ✅ CORREGIDO: p.stock_minimo coincide ahora con tu CREATE TABLE
+            cur.execute("""
+                SELECT ri.producto_id, p.nombre, ri.cantidad, p.cantidad, p.unidad, p.stock_minimo
+                FROM receta_ingredientes ri
+                JOIN productos p ON ri.producto_id = p.id
+                WHERE ri.receta_id = ?
+            """, (rid,))
+            
+            ingredientes = cur.fetchall()
+            if not ingredientes:
+                messagebox.showwarning("Atención", "Esta receta no tiene ingredientes.")
+                conn.close()
+                return
+
+            items_anadidos = []
+
+            for p_id, p_nombre, cant_nec, stock_act, unidad, stock_min in ingredientes:
+                try:
+                    # 🛡️ Limpieza total para evitar errores de 'str' a 'float'
+                    # Si el campo está vacío o es None, usamos "0.0"
+                    n_necesaria = float(str(cant_nec).strip().replace(',', '.')) if cant_nec else 0.0
+                    
+                    raw_stock = float(str(stock_act).strip().replace(',', '.')) if stock_act else 0.0
+                    n_stock = max(0.0, raw_stock) # Filtro para el aceite -2.0
+                    
+                    n_minimo = float(str(stock_min).strip().replace(',', '.')) if stock_min else 0.0
+                except (ValueError, TypeError):
+                    n_necesaria = n_stock = n_minimo = 0.0
+
+                # 💡 Lógica de Stock Mínimo
+                stock_proyectado = n_stock - n_necesaria
+
+                if stock_proyectado < n_minimo:
+                    # Calculamos cuánto falta para cubrir la receta y quedar en el mínimo
+                    faltante = round((n_necesaria + n_minimo) - n_stock, 2)
+                    
+                    if faltante > 0:
+                        cur.execute("SELECT id, cantidad FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
+                        existe = cur.fetchone()
+                        
+                        if existe:
+                            try:
+                                cant_previa = float(str(existe[1]).replace(',', '.'))
+                                nueva_cant = round(cant_previa + faltante, 2)
+                                cur.execute("UPDATE lista_compras SET cantidad = ? WHERE id = ?", (nueva_cant, existe[0]))
+                            except: pass
+                        else:
+                            cur.execute("""
+                                INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
+                                VALUES (?, ?, ?, 0)
+                            """, (p_id, faltante, unidad))
+                        
+                        items_anadidos.append(f"- {p_nombre}: {faltante} {unidad}")
+
+            # Registrar la receta en pendientes
             cur.execute("""
                 INSERT INTO recetas_pendientes (receta_id, fecha_planificada, completada)
                 VALUES (?, date('now', 'localtime'), 0)
             """, (rid,))
+
             conn.commit()
             conn.close()
 
-            messagebox.showinfo("Éxito", f"'{nombre_receta}' lista para cocinar.\nSe han revisado los ingredientes en la lista de compra.")
-            
+            mensaje = f"✅ '{nombre_receta}' añadida a pendientes."
+            if items_anadidos:
+                mensaje += "\n\n⚠️ Stock insuficiente o bajo mínimos. Añadido a la lista de compras:\n" + "\n".join(items_anadidos)
+            else:
+                mensaje += "\n\n✨ Tienes stock suficiente para esta receta."
+                
+            messagebox.showinfo("Planificador", mensaje)
+
         except Exception as e:
-            messagebox.showerror("Error", f"Hubo un problema: {e}")
+            if 'conn' in locals() and conn: conn.close()
+            messagebox.showerror("Error", f"Fallo crítico: {e}")
+
+            
+
     # =====================================================
     # INGREDIENTES
     # =====================================================

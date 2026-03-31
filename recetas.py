@@ -34,44 +34,42 @@ def agregar_ingrediente_a_receta(receta_id, producto_id, cantidad, unidad):
 
 def preparar_receta(receta_id):
     conexion_bd = conexion()
-    if not conexion_bd:
-        return
+    if not conexion_bd: return False
     cursor = conexion_bd.cursor()
 
+    # 1. Consultar ingredientes necesarios vs stock actual
     cursor.execute("""
-        SELECT ri.producto_id, ri.cantidad, ri.unidad, p.cantidad, p.nombre
+        SELECT ri.producto_id, ri.cantidad, p.cantidad, p.nombre, ri.unidad
         FROM receta_ingredientes ri
         JOIN productos p ON ri.producto_id = p.id
         WHERE ri.receta_id = ?
     """, (receta_id,))
-
     ingredientes = cursor.fetchall()
 
+    # 2. Validar faltantes
     faltantes = []
-    for producto_id, cant_receta, unidad, cant_actual, nombre in ingredientes:
-        if cant_actual < cant_receta:
-            faltantes.append((nombre, cant_actual, cant_receta, unidad))
+    for pid, cant_nec, stock_act, nombre, unidad in ingredientes:
+        if stock_act < cant_nec:
+            faltantes.append(f"{nombre} (Necesitas {cant_nec}{unidad}, tienes {stock_act})")
 
     if faltantes:
-        print("No se puede preparar la receta. Faltan ingredientes:")
-        for nombre, actual, necesario, unidad in faltantes:
-            print(f"- {nombre}: hay {actual} {unidad}, se necesitan {necesario} {unidad}")
+        mensaje = "No hay stock suficiente:\n" + "\n".join(faltantes)
+        # Retornamos False y el mensaje de error
         conexion_bd.close()
-        return
+        return False, mensaje
 
-    for producto_id, cant_receta, unidad, cant_actual, nombre in ingredientes:
-        cursor.execute("""
-            UPDATE productos
-            SET cantidad = cantidad - ?
-            WHERE id = ?
-        """, (cant_receta, producto_id))
-
-    conexion_bd.commit()
-    conexion_bd.close()
-
-    verificar_stock_minimo()
-
-    print(f"Receta {receta_id} preparada correctamente y stock actualizado.")
+    # 3. Si todo está OK, descontar stock
+    try:
+        for pid, cant_nec, stock_act, nombre, unidad in ingredientes:
+            cursor.execute("UPDATE productos SET cantidad = cantidad - ? WHERE id = ?", (cant_nec, pid))
+        
+        conexion_bd.commit()
+        return True, "¡Receta preparada con éxito!"
+    except Exception as e:
+        conexion_bd.rollback()
+        return False, f"Error en la base de datos: {e}"
+    finally:
+        conexion_bd.close()
 
 
 def generar_lista_desde_receta(receta_id, usuario_id=None):
