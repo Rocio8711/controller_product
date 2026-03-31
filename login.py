@@ -1,29 +1,69 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import simpledialog
+from tkinter import messagebox, simpledialog
 from usuario import login as login_bd
-from grafica import App
-
+from grafica import App  # Importamos tu clase principal moderna
 
 class LoginApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Login")
-        self.root.geometry("300x200")
+        self.root.title("Login - Controller Product")
+        self.root.geometry("400x400")
+        self.root.configure(bg="#F8F9FA") # Fondo claro y limpio
 
-        tk.Label(root, text="Email").pack()
-        self.email_entry = tk.Entry(root)
-        self.email_entry.pack()
+        # Centrar la ventana de login en la pantalla al iniciar
+        self.root.eval('tk::PlaceWindow . center')
 
-        tk.Label(root, text="Contraseña").pack()
-        self.password_entry = tk.Entry(root, show="*")
-        self.password_entry.pack()
+        # --- Contenedor Principal ---
+        self.container = tk.Frame(root, bg="#F8F9FA", pady=20)
+        self.container.pack(expand=True)
 
-        tk.Button(root, text="Iniciar sesión", command=self.login).pack(pady=10)
-        tk.Button(root, text="Registrarse", command=self.abrir_registro).pack()
-   
-   
-   
+        # Título
+        tk.Label(self.container, text="BIENVENIDO", font=("Segoe UI", 20, "bold"), 
+                 bg="#F8F9FA", fg="#2E7D32").pack(pady=(0, 25))
+
+        # Campo Email
+        tk.Label(self.container, text="Email", bg="#F8F9FA", font=("Segoe UI", 10, "bold"), fg="#555555").pack(anchor="w")
+        self.email_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30, bd=1, relief="solid")
+        self.email_entry.pack(pady=(5, 20), ipady=5)
+
+        # Campo Contraseña
+        tk.Label(self.container, text="Contraseña", bg="#F8F9FA", font=("Segoe UI", 10, "bold"), fg="#555555").pack(anchor="w")
+        self.password_entry = tk.Entry(self.container, show="*", font=("Segoe UI", 12), width=30, bd=1, relief="solid")
+        self.password_entry.pack(pady=(5, 30), ipady=5)
+
+        # Botón Iniciar Sesión (Estilo moderno)
+        self.btn_login = tk.Button(
+            self.container, text="Iniciar Sesión", command=self.login,
+            bg="#2E7D32", fg="white", font=("Segoe UI", 12, "bold"),
+            width=25, bd=0, cursor="hand2", pady=10, activebackground="#388E3C", activeforeground="white"
+        )
+        self.btn_login.pack(pady=5)
+
+        # Botón Registrar
+        tk.Button(
+            self.container, text="¿No tienes cuenta? Regístrate", 
+            command=self.abrir_registro, bg="#F8F9FA", fg="#2E7D32", 
+            bd=0, cursor="hand2", font=("Segoe UI", 10, "underline")
+        ).pack(pady=10)
+
+    def mostrar_notificacion(self, mensaje, color_bg="#2E7D32"):
+        """Crea un mensaje flotante que desaparece solo tras 3 segundos"""
+        toast = tk.Toplevel(self.root)
+        toast.overrideredirect(True) # Quita bordes de ventana
+        toast.configure(bg=color_bg)
+        
+        # Posicionamiento centrado respecto al Login
+        self.root.update_idletasks()
+        x = self.root.winfo_x() + (self.root.winfo_width() // 2) - 120
+        y = self.root.winfo_y() + (self.root.winfo_height() // 2) - 30
+        toast.geometry(f"+{int(x)}+{int(y)}")
+
+        tk.Label(toast, text=mensaje, fg="white", bg=color_bg, 
+                 padx=30, pady=15, font=("Segoe UI", 12, "bold")).pack()
+
+        # Se destruye a los 3 segundos automáticamente
+        toast.after(3000, toast.destroy)
+
     def login(self):
         email = self.email_entry.get()
         password = self.password_entry.get()
@@ -31,53 +71,61 @@ class LoginApp:
         usuario = login_bd(email, password)
 
         if usuario:
-            messagebox.showinfo("OK", f"Bienvenid@ {usuario[1].capitalize()}")
+            nombre = usuario[1].capitalize()
+            # 1. Mostrar notificación visual
+            self.mostrar_notificacion(f"✅ ¡Bienvenid@ {nombre}!")
+            
+            # 2. Desactivar botones para evitar dobles clics
+            self.btn_login.config(state="disabled")
 
-            self.root.destroy()  # Cerramos la ventana de login
-
-            app = App()          # Creamos la ventana principal
-            app.mainloop()
-
+            # 3. Esperar 1.5 seg para que se vea el mensaje y saltar a la App
+            self.root.after(1500, self.finalizar_login) 
         else:
             messagebox.showerror("Error", "Credenciales incorrectas")
-    
+
+    def finalizar_login(self):
+        """Cierra el login y lanza la aplicación principal"""
+        self.root.destroy()
+        app_principal = App()
+        app_principal.mainloop()
+
     def abrir_registro(self):
-        clave = simpledialog.askstring("Clave requerida", "Introduce la clave del gestor:", show="*")
-
-        CLAVE_GESTOR = "12345"  # cámbiala por la que quieras
-
-        if clave != CLAVE_GESTOR:
+        clave = simpledialog.askstring("Acceso Restringido", "Introduce la clave de gestor:", show="*")
+        if clave != "12345":
             messagebox.showerror("Error", "Clave incorrecta")
             return
 
         ventana = tk.Toplevel(self.root)
-        ventana.title("Registro")
-        ventana.geometry("300x250")
+        ventana.title("Registro de Usuario")
+        ventana.geometry("350x450")
+        ventana.configure(bg="#F8F9FA")
 
-        tk.Label(ventana, text="Nombre").pack()
-        nombre_entry = tk.Entry(ventana)
-        nombre_entry.pack()
+        # Formulario de registro (simplificado para el ejemplo)
+        tk.Label(ventana, text="NUEVO REGISTRO", font=("Segoe UI", 14, "bold"), bg="#F8F9FA", fg="#2E7D32").pack(pady=20)
+        
+        tk.Label(ventana, text="Nombre completo", bg="#F8F9FA").pack()
+        nom_e = tk.Entry(ventana, width=30); nom_e.pack(pady=5)
 
-        tk.Label(ventana, text="Email").pack()
-        email_entry = tk.Entry(ventana)
-        email_entry.pack()
+        tk.Label(ventana, text="Email", bg="#F8F9FA").pack()
+        ema_e = tk.Entry(ventana, width=30); ema_e.pack(pady=5)
 
-        tk.Label(ventana, text="Contraseña").pack()
-        password_entry = tk.Entry(ventana, show="*")
-        password_entry.pack()
+        tk.Label(ventana, text="Contraseña", bg="#F8F9FA").pack()
+        pas_e = tk.Entry(ventana, show="*", width=30); pas_e.pack(pady=5)
 
-        def registrar():
-            nombre = nombre_entry.get()
-            email = email_entry.get()
-            password = password_entry.get()
-
+        def ejecutar_registro():
             from usuario import agregar_usuario
-            agregar_usuario(nombre, email, password)
+            if nom_e.get() and ema_e.get() and pas_e.get():
+                agregar_usuario(nom_e.get(), ema_e.get(), pas_e.get())
+                messagebox.showinfo("Éxito", "Usuario creado correctamente")
+                ventana.destroy()
+            else:
+                messagebox.showwarning("Atención", "Rellena todos los campos")
 
-            messagebox.showinfo("OK", "Usuario registrado")
-            ventana.destroy()
+        tk.Button(ventana, text="Crear Cuenta", command=ejecutar_registro, 
+                  bg="#2E7D32", fg="white", width=20, pady=10, bd=0).pack(pady=30)
 
-        tk.Button(ventana, text="Crear cuenta", command=registrar).pack(pady=10)
+# --- INICIO DE LA APLICACIÓN ---
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    root = tk.Tk()
+    app = LoginApp(root)
+    root.mainloop()
