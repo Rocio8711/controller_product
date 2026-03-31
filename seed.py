@@ -52,24 +52,24 @@ def insertar_datos_prueba():
     # =========================
     # LISTA DE COMPRAS (SIN DUPLICADOS SIMPLES)
     # =========================
-    cursor.execute("SELECT id FROM lista_compras WHERE producto_id = 1 AND usuario_id_asignado = 1")
+    cursor.execute("SELECT id FROM lista_comprass WHERE producto_id = 1 AND usuario_id_asignado = 1")
     if not cursor.fetchone():
         cursor.execute(
-            "INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
             (1, 2, "litros", 0, 1)
         )
 
-    cursor.execute("SELECT id FROM lista_compras WHERE producto_id = 2 AND usuario_id_asignado = 2")
+    cursor.execute("SELECT id FROM lista_comprass WHERE producto_id = 2 AND usuario_id_asignado = 2")
     if not cursor.fetchone():
         cursor.execute(
-            "INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
             (2, 5, "unidades", 0, 2)
         )
 
-    cursor.execute("SELECT id FROM lista_compras WHERE producto_id = 3 AND usuario_id_asignado = 1")
+    cursor.execute("SELECT id FROM lista_comprass WHERE producto_id = 3 AND usuario_id_asignado = 1")
     if not cursor.fetchone():
         cursor.execute(
-            "INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado, usuario_id_asignado) VALUES (?, ?, ?, ?, ?)",
             (3, 12, "unidades", 1, 1)
         )
 

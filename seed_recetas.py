@@ -32,10 +32,10 @@ def insertar_recetas():
     ]
 
     for receta in recetas:
-        cursor.execute(
-            "INSERT INTO recetas (nombre) VALUES (?)",
-            (receta,)
-        )
+        cursor.execute("""
+        INSERT OR IGNORE INTO recetas (nombre)
+        VALUES (?)
+        """, (receta,))
 
     conexion_bd.commit()
     conexion_bd.close()

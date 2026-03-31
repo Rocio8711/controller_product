@@ -33,7 +33,7 @@ def crear_tablas():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS recetas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL
+        nombre TEXT NOT NULL UNIQUE
     )
     """)
     
@@ -46,10 +46,11 @@ def crear_tablas():
         cantidad REAL NOT NULL,
         unidad TEXT NOT NULL,
         FOREIGN KEY (receta_id) REFERENCES recetas(id),
-        FOREIGN KEY (producto_id) REFERENCES productos(id)
+        FOREIGN KEY (producto_id) REFERENCES productos(id),
+        UNIQUE(receta_id, producto_id)
     )
     """)
-    
+
     # Tabla de lista de compras
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS lista_compras (

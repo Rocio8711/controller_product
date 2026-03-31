@@ -9,7 +9,14 @@ def insertar_datos():
     cursor = conexion_bd.cursor()
 
     # =========================
-    # RECETAS (asumimos IDs 1-5)
+    # 🧹 LIMPIAR TABLAS (CLAVE)
+    # =========================
+    cursor.execute("DELETE FROM receta_ingredientes")
+    cursor.execute("DELETE FROM recetas")
+    cursor.execute("DELETE FROM productos")
+
+    # =========================
+    # RECETAS
     # =========================
     recetas = [
         "Tortilla de patatas",
@@ -23,7 +30,7 @@ def insertar_datos():
         cursor.execute("INSERT INTO recetas (nombre) VALUES (?)", (r,))
 
     # =========================
-    # PRODUCTOS (IMPORTANTE: IDs fijos)
+    # PRODUCTOS
     # =========================
     productos = [
         ("Patata", "kg"),
@@ -46,32 +53,32 @@ def insertar_datos():
     # INGREDIENTES RECETAS
     # =========================
 
-    # Tortilla (receta_id = 1)
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 1, 0.5, 'kg')")  # patata
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 2, 3, 'unidades')")  # huevo
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 3, 0.1, 'litros')")  # aceite
+    # Tortilla (1)
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 1, 0.5, 'kg')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 2, 3, 'unidades')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 1, 3, 0.1, 'litros')")
 
-    # Paella (receta_id = 2)
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 4, 0.5, 'kg')")  # arroz
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 5, 0.5, 'kg')")  # pollo
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 7, 0.3, 'kg')")  # tomate
+    # Paella (2)
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 4, 0.5, 'kg')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 5, 0.5, 'kg')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 2, 7, 0.3, 'kg')")
 
-    # Ensalada (receta_id = 3)
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 3, 6, 1, 'unidades')")  # lechuga
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 3, 7, 0.2, 'kg')")  # tomate
+    # Ensalada (3)
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 3, 6, 1, 'unidades')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 3, 7, 0.2, 'kg')")
 
-    # Macarrones (receta_id = 4)
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 4, 8, 0.5, 'kg')")  # pasta
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 4, 7, 0.3, 'kg')")  # tomate
+    # Macarrones (4)
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 4, 8, 0.5, 'kg')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 4, 7, 0.3, 'kg')")
 
-    # Pollo al horno (receta_id = 5)
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 5, 5, 1, 'kg')")  # pollo
-    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 5, 3, 0.05, 'litros')")  # aceite
+    # Pollo al horno (5)
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 5, 5, 1, 'kg')")
+    cursor.execute("INSERT INTO receta_ingredientes VALUES (NULL, 5, 3, 0.05, 'litros')")
 
     conexion_bd.commit()
     conexion_bd.close()
 
-    print("Recetas + ingredientes insertados correctamente")
+    print("✅ Base de datos reiniciada correctamente (sin duplicados)")
 
 
 if __name__ == "__main__":

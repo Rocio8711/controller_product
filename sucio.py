@@ -2,13 +2,13 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
-# 1. IMPORTA TUS VENTANAS (Asegúrate de que los nombres de archivo sean correctos)
 from HomeFrame import HomeFrame
 from InventarioFrame import InventarioFrame
 from RecetasFrame import RecetasFrame
 from ListaFrame import ListaFrame
 
-# 2. Imports de tus módulos de lógica
+
+# Imports de módulos personalizados
 from lista_compras import marcar_comprado, ver_tareas_todas
 from recetas import (
     generar_lista_desde_receta, 
@@ -18,6 +18,7 @@ from recetas import (
 from inventario import ver_inventario
 from acceso_base_datos import conexion
 
+
 # =========================
 # 🧠 APP PRINCIPAL
 # =========================
@@ -26,7 +27,7 @@ class App(tk.Tk):
         super().__init__()
 
         self.title("SmartKitchen Inventory")
-        self.geometry("900x700") # Un poco más grande para que luzca el diseño
+        self.geometry("800x600")
 
         self.modo_oscuro = True
 
@@ -34,7 +35,6 @@ class App(tk.Tk):
         self.style.theme_use("clam")
 
         self._set_global_colors()
-        self._configurar_estilos_treeview() # Movido a una función limpia
 
         container = tk.Frame(self, bg=self.bg_app)
         container.pack(fill="both", expand=True)
@@ -42,7 +42,6 @@ class App(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        # Aquí se crean las instancias de las clases importadas
         for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame):
             frame = F(container, self)
             self.frames[F] = frame
@@ -54,51 +53,12 @@ class App(tk.Tk):
         self.bg_app = "#121212" if self.modo_oscuro else "#F0F0F0"
         self.fg_app = "white" if self.modo_oscuro else "black"
 
-    def _configurar_estilos_treeview(self):
-        """Configura el look de todas las tablas de la app"""
-        bg_tree = "#1E1E1E" if self.modo_oscuro else "#ffffff"
-        fg_tree = "white" if self.modo_oscuro else "black"
-        
-        self.style.configure("Treeview.Heading",
-            font=("Segoe UI", 11, "bold"),
-            background="#2E7D32",
-            foreground="white",
-            padding=6,
-            relief="flat"
-        )
-        self.style.map("Treeview.Heading", background=[("active", "#388E3C")])
-
-        self.style.configure("Treeview",
-            background=bg_tree,
-            foreground=fg_tree,
-            rowheight=28,
-            fieldbackground=bg_tree,
-            font=("Segoe UI", 10)
-        )
-        self.style.map("Treeview",
-            background=[("selected", "#A5D6A7")],
-            foreground=[("selected", "black")]
-        )
-
     def toggle_modo_oscuro(self):
         self.modo_oscuro = not self.modo_oscuro
         self._set_global_colors()
-        self._configurar_estilos_treeview()
 
-        # Refrescar todos los frames
         for frame in self.frames.values():
-            if hasattr(frame, "setup_ui"):
-                for widget in frame.winfo_children():
-                    widget.destroy()
-                frame.setup_ui()
-                
-                # --- AQUÍ ESTÁ EL TRUCO ---
-                # Si el frame tiene una función 'cargar', la llamamos 
-                # inmediatamente después de reconstruir la interfaz
-                if hasattr(frame, "cargar"):
-                    frame.cargar()
-                    
-            elif hasattr(frame, "_setup_ui"):
+            if hasattr(frame, "_setup_ui"):
                 frame._setup_ui()
 
     def show_frame(self, frame_class):
@@ -109,6 +69,53 @@ class App(tk.Tk):
     def _refresh_frame(self, frame):
         if hasattr(frame, "cargar"):
             frame.cargar()
+
+
+        # 🔹 Cabeceras
+        self.style.configure("Treeview.Heading",
+            font=("Segoe UI", 11, "bold"),
+            background="#2E7D32",
+            foreground="white",
+            padding=6,
+            relief="flat"
+        )
+
+        # Hover en cabecera
+        self.style.map("Treeview.Heading",
+            background=[("active", "#388E3C")]
+        )
+
+        # 🔹 Tabla
+        self.style.configure("Treeview",
+            background="#ffffff",
+            foreground="black",
+            rowheight=28,
+            fieldbackground="#ffffff",
+            font=("Segoe UI", 10)
+        )
+
+        # Selección
+        self.style.map("Treeview",
+            background=[("selected", "#A5D6A7")],
+            foreground=[("selected", "black")]
+        )
+# =========================
+# 🏠 HOME
+# =========================
+
+
+# =========================
+# 📦 INVENTARIO
+# =========================
+
+# =========================
+# 🍳 RECETAS
+# =========================
+
+
+# =========================
+# 🛒 LISTA COMPRA
+# =========================
 
 # =========================
 # EJECUCIÓN
