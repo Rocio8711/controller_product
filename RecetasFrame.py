@@ -94,7 +94,7 @@ class RecetasFrame(tk.Frame):
         self.frame_recetas.pack(pady=5)
 
         tk.Button(self.frame_recetas, text="➕ Nueva", command=self.crear_receta, bg="#4CAF50", fg="white").grid(row=0, column=1, padx=5)
-        tk.Button(self.frame_recetas, text="✏️ Editar", command=self.editar_receta, bg="#FF9800", fg="white").grid(row=0, column=2, padx=5)
+        tk.Button(self.frame_recetas, text="✏️ Modificar", command=self.modificar_receta, bg="#FF9800", fg="white").grid(row=0, column=2, padx=5)
         tk.Button(self.frame_recetas, text="🗑️ Borrar", command=self.borrar_receta, bg="#F44336", fg="white").grid(row=0, column=3, padx=5)
         tk.Button(self.frame_recetas, text="📝 Usar", command=self.usar_receta, bg="#2196F3", fg="white").grid(row=0, column=4, padx=5)
 
@@ -145,7 +145,7 @@ class RecetasFrame(tk.Frame):
         tk.Button(self.frame_ing, text="✏️ Modificar", command=self.modificar_ingrediente,
                 bg="#FF9800", fg="white").grid(row=0, column=1, padx=5)
 
-        tk.Button(self.frame_ing, text="🗑️ Eliminar", command=self.eliminar_ingrediente,
+        tk.Button(self.frame_ing, text="🗑️ Borrar", command=self.borrar_ingrediente,
                 bg="#F44336", fg="white").grid(row=0, column=2, padx=5)
 
 
@@ -154,8 +154,8 @@ class RecetasFrame(tk.Frame):
         # =========================
         self.menu_recetas = tk.Menu(self, tearoff=0)
         self.menu_recetas.add_command(label="➕ Nueva receta", command=self.crear_receta)
-        self.menu_recetas.add_command(label="✏️ Editar receta", command=self.editar_receta)
-        self.menu_recetas.add_command(label="🗑️ Eliminar receta", command=self.borrar_receta)
+        self.menu_recetas.add_command(label="✏️ Modificar receta", command=self.modificar_receta)
+        self.menu_recetas.add_command(label="🗑️ Borrar receta", command=self.borrar_receta)
         self.menu_recetas.add_separator()
         self.menu_recetas.add_command(label="📝 Usar receta", command=self.usar_receta)
 
@@ -165,7 +165,7 @@ class RecetasFrame(tk.Frame):
         self.menu_ing = tk.Menu(self, tearoff=0)
         self.menu_ing.add_command(label="➕ Añadir", command=self.anadir_ingrediente)
         self.menu_ing.add_command(label="✏️ Modificar", command=self.modificar_ingrediente)
-        self.menu_ing.add_command(label="🗑️ Eliminar", command=self.eliminar_ingrediente)
+        self.menu_ing.add_command(label="🗑️ Borrar", command=self.borrar_ingrediente)
 
     # =====================================================
     # POPUPS
@@ -267,7 +267,7 @@ class RecetasFrame(tk.Frame):
         tk.Button(win, text="Guardar", command=guardar, bg="#4CAF50", fg="white", 
                   bd=0, padx=15, pady=6, cursor="hand2").pack(pady=15)
 
-    def editar_receta(self):
+    def modificar_receta(self):
         sel = self.tree.selection()
         if not sel:
             return
@@ -307,7 +307,7 @@ class RecetasFrame(tk.Frame):
         if not sel:
             return
 
-        if not messagebox.askyesno("Confirmar", "¿Eliminar esta receta?"):
+        if not messagebox.askyesno("Confirmar", "¿Borrar esta receta?"):
             return
 
         rid = self.tree.item(sel[0])["values"][0]
@@ -528,7 +528,7 @@ class RecetasFrame(tk.Frame):
             bg="#FF9800", fg="white", bd=0, padx=15, pady=7, cursor="hand2"
         ).pack(pady=20)
 
-    def eliminar_ingrediente(self):
+    def borrar_ingrediente(self):
         sel_r = self.tree.selection()
         sel_i = self.tree_ing.selection()
 

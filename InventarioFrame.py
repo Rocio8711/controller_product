@@ -103,9 +103,9 @@ class InventarioFrame(tk.Frame):
         # 🔹 Menú contextual (igual que lo tienes)
         self.menu = tk.Menu(self, tearoff=0, font=("Segoe UI", 10, "bold"), bd=0)
         self.menu.add_command(label="➕   Añadir producto", command=self.abrir_agregar)
-        self.menu.add_command(label="✏️   Editar producto", command=self.modificar_producto)
+        self.menu.add_command(label="✏️   Modificar producto", command=self.modificar_producto)
         self.menu.add_separator()
-        self.menu.add_command(label="🗑️   Eliminar producto", command=self.eliminar_producto)
+        self.menu.add_command(label="🗑️   Borrar producto", command=self.borrar_producto)
 
         self.tree.bind("<Button-3>", self.mostrar_menu)
 
@@ -115,7 +115,7 @@ class InventarioFrame(tk.Frame):
 
         tk.Button(self.frame_acciones, text="➕ Añadir", command=self.abrir_agregar, bg="#4CAF50", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
         tk.Button(self.frame_acciones, text="✏️ Modificar", command=self.modificar_producto, bg="#FF9800", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
-        tk.Button(self.frame_acciones, text="❌ Eliminar", command=self.eliminar_producto, bg="#F44336", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
+        tk.Button(self.frame_acciones, text="❌ Borrar", command=self.borrar_producto, bg="#F44336", fg="white", font=("Arial", 10, "bold"), bd=0, padx=10, pady=6, cursor="hand2").pack(side="left", padx=5)
 
         # 🔹 Botón cargar datos
         self.btn_cargar = tk.Button(
@@ -199,14 +199,14 @@ class InventarioFrame(tk.Frame):
 
         tk.Button(ventana, text="Guardar", bg="#4CAF50", fg="white", command=guardar).pack(pady=15)
 
-    def eliminar_producto(self):
+    def borrar_producto(self):
         seleccion = self.tree.selection()
         if not seleccion:
             messagebox.showwarning("Error", "Selecciona un producto")
             return
         
         producto_id = self.tree.item(seleccion)["values"][0]
-        if messagebox.askyesno("Confirmar", "¿Eliminar este producto?"):
+        if messagebox.askyesno("Confirmar", "¿Borrar este producto?"):
             conn = conexion()
             cursor = conn.cursor()
             cursor.execute("DELETE FROM productos WHERE id = ?", (producto_id,))
