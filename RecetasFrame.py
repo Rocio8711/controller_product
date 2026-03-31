@@ -90,7 +90,6 @@ class RecetasFrame(tk.Frame):
         self.frame_recetas = tk.Frame(self, bg=bg)
         self.frame_recetas.pack(pady=5)
 
-        tk.Button(self.frame_recetas, text="🔄 Cargar", command=self.cargar).grid(row=0, column=0, padx=5)
         tk.Button(self.frame_recetas, text="➕ Nueva", command=self.crear_receta, bg="#4CAF50", fg="white").grid(row=0, column=1, padx=5)
         tk.Button(self.frame_recetas, text="✏️ Editar", command=self.editar_receta, bg="#FF9800", fg="white").grid(row=0, column=2, padx=5)
         tk.Button(self.frame_recetas, text="🗑️ Borrar", command=self.borrar_receta, bg="#F44336", fg="white").grid(row=0, column=3, padx=5)
@@ -297,24 +296,38 @@ class RecetasFrame(tk.Frame):
         rid = self.tree.item(sel[0])["values"][0]
 
         win = tk.Toplevel(self)
-        tk.Label(win, text="Producto ID").pack()
-        p = tk.Entry(win); p.pack()
+        win.title("Añadir ingrediente")
+
+        tk.Label(win, text="Producto").pack()
+
+        conn = conexion()
+        cur = conn.cursor()
+        cur.execute("SELECT id, nombre, unidad FROM productos")
+        productos = cur.fetchall()
+        conn.close()
+
+        opciones = {f"{p[1]} ({p[2]})": (p[0], p[2]) for p in productos}
+
+        combo = ttk.Combobox(win, values=list(opciones.keys()), state="readonly")
+        combo.pack(pady=5)
 
         tk.Label(win, text="Cantidad").pack()
-        c = tk.Entry(win); c.pack()
-
-        tk.Label(win, text="Unidad").pack()
-        u = tk.Entry(win); u.pack()
+        c = tk.Entry(win)
+        c.pack()
 
         def guardar():
+            if not combo.get():
+                return
+
+            producto_id, unidad = opciones[combo.get()]
+
             conn = conexion()
             cur = conn.cursor()
 
-            # 🔥 ANTI DUPLICADOS REAL
             cur.execute("""
                 SELECT 1 FROM receta_ingredientes
                 WHERE receta_id=? AND producto_id=?
-            """, (rid, p.get()))
+            """, (rid, producto_id))
 
             if cur.fetchone():
                 messagebox.showerror("Error", "Ese ingrediente ya existe en esta receta")
@@ -325,14 +338,14 @@ class RecetasFrame(tk.Frame):
                 INSERT INTO receta_ingredientes
                 (receta_id, producto_id, cantidad, unidad)
                 VALUES (?,?,?,?)
-            """, (rid, p.get(), c.get(), u.get()))
+            """, (rid, producto_id, c.get(), unidad))
 
             conn.commit()
             conn.close()
             win.destroy()
             self.cargar_ingredientes(rid)
 
-        tk.Button(win, text="Guardar", command=guardar).pack()
+        tk.Button(win, text="Guardar", command=guardar).pack(pady=10)
 
     def modificar_ingrediente(self):
         sel_r = self.tree.selection()
