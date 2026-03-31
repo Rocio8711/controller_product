@@ -16,6 +16,9 @@ class RecetasFrame(tk.Frame):
 
         self.setup_ui()
 
+
+
+
     # =====================================================
     # UI
     # =====================================================
@@ -194,12 +197,19 @@ class RecetasFrame(tk.Frame):
 
         for r in obtener_recetas():
             self.tree.insert("", "end", values=(r[0], r[1]))
+        if self.tree.get_children():
+            first = self.tree.get_children()[0]
+            self.tree.selection_set(first)
+            self.tree.focus(first)
+            self.after(50, lambda: self.on_select_receta(None))#para que no se descuadre visualemnte
 
-    def on_select_receta(self, event):
+    def on_select_receta(self, event=None):
         sel = self.tree.selection()
-        if sel:
-            rid = self.tree.item(sel[0])["values"][0]
-            self.cargar_ingredientes(rid)
+        if not sel:
+            return
+
+        rid = self.tree.item(sel[0])["values"][0]
+        self.cargar_ingredientes(rid)
 
     def cargar_ingredientes(self, receta_id):
         self.tree_ing.delete(*self.tree_ing.get_children())
@@ -224,8 +234,18 @@ class RecetasFrame(tk.Frame):
     # =====================================================
     def crear_receta(self):
         win = tk.Toplevel(self)
-        tk.Label(win, text="Nombre").pack()
-        e = tk.Entry(win); e.pack()
+
+        modo = self.controller.modo_oscuro
+        bg = "#121212" if modo else "#F0F0F0"
+        fg = "white" if modo else "black"
+        btn_bg = "#4CAF50"
+
+        win.configure(bg=bg)
+
+        tk.Label(win, text="Nombre", bg=bg, fg=fg).pack(pady=(10, 0))
+
+        e = tk.Entry(win)
+        e.pack(pady=5)
 
         def guardar():
             conn = conexion()
@@ -236,7 +256,17 @@ class RecetasFrame(tk.Frame):
             win.destroy()
             self.cargar()
 
-        tk.Button(win, text="Guardar", command=guardar).pack()
+        tk.Button(
+            win,
+            text="Guardar",
+            command=guardar,
+            bg=btn_bg,
+            fg="white",
+            bd=0,
+            padx=10,
+            pady=6,
+            cursor="hand2"
+        ).pack(pady=15)
 
     def editar_receta(self):
         sel = self.tree.selection()
@@ -287,7 +317,6 @@ class RecetasFrame(tk.Frame):
 
     # =====================================================
     # INGREDIENTES
-    # =====================================================
     def anadir_ingrediente(self):
         sel = self.tree.selection()
         if not sel:
@@ -298,22 +327,44 @@ class RecetasFrame(tk.Frame):
         win = tk.Toplevel(self)
         win.title("Añadir ingrediente")
 
-        tk.Label(win, text="Producto").pack()
+        modo = self.controller.modo_oscuro
+        bg = "#121212" if modo else "#F0F0F0"
+        fg = "white" if modo else "black"
+        btn_bg = "#4CAF50" if modo else "#2E7D32"
 
+        win.configure(bg=bg)
+
+        # ===== PRODUCTOS =====
         conn = conexion()
         cur = conn.cursor()
         cur.execute("SELECT id, nombre, unidad FROM productos")
         productos = cur.fetchall()
         conn.close()
 
-        opciones = {f"{p[1]} ({p[2]})": (p[0], p[2]) for p in productos}
+        opciones = {
+            f"{nombre} ({unidad})": (pid, unidad)
+            for pid, nombre, unidad in productos
+        }
 
-        combo = ttk.Combobox(win, values=list(opciones.keys()), state="readonly")
+        tk.Label(win, text="Producto", bg=bg, fg=fg).pack(pady=(10, 0))
+
+        combo = ttk.Combobox(
+            win,
+            values=list(opciones.keys()),
+            state="readonly",
+            width=30
+        )
         combo.pack(pady=5)
 
-        tk.Label(win, text="Cantidad").pack()
-        c = tk.Entry(win)
-        c.pack()
+        tk.Label(win, text="Cantidad", bg=bg, fg=fg).pack(pady=(10, 0))
+
+        c = tk.Entry(
+            win,
+            bg="#2E2E2E" if modo else "white",
+            fg=fg,
+            insertbackground=fg
+        )
+        c.pack(pady=5)
 
         def guardar():
             if not combo.get():
@@ -342,10 +393,11 @@ class RecetasFrame(tk.Frame):
 
             conn.commit()
             conn.close()
+
             win.destroy()
             self.cargar_ingredientes(rid)
 
-        tk.Button(win, text="Guardar", command=guardar).pack(pady=10)
+        tk.Button(win, text="Guardar", command=guardar, bg=btn_bg, fg="white").pack(pady=10)
 
     def modificar_ingrediente(self):
         sel_r = self.tree.selection()
@@ -408,5 +460,21 @@ class RecetasFrame(tk.Frame):
         self.controller.show_frame(HomeFrame)
 
     def alternar_modo(self):
+
         self.controller.toggle_modo_oscuro()
-        self.setup_ui()
+
+        # SOLO refrescar UI, NO redefinir estilos
+        self.aplicar_tema()
+
+    def aplicar_tema(self):
+        self.tree.configure(style="Treeview")
+        self.tree_ing.configure(style="Treeview")
+
+        self.update()
+        self.update_idletasks()
+
+        self.tree.update()
+        self.tree_ing.update()
+
+
+    
