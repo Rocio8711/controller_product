@@ -234,77 +234,110 @@ class RecetasFrame(tk.Frame):
     # =====================================================
     def crear_receta(self):
         win = tk.Toplevel(self)
+        win.title("Nueva Receta")
+        win.geometry("300x180")
 
         modo = self.controller.modo_oscuro
         bg = "#121212" if modo else "#F0F0F0"
         fg = "white" if modo else "black"
-        btn_bg = "#4CAF50"
+        entry_bg = "#2E2E2E" if modo else "white"
 
         win.configure(bg=bg)
 
-        tk.Label(win, text="Nombre", bg=bg, fg=fg).pack(pady=(10, 0))
+        tk.Label(win, text="Nombre de la receta:", bg=bg, fg=fg, font=("Arial", 10, "bold")).pack(pady=(20, 5))
 
-        e = tk.Entry(win)
-        e.pack(pady=5)
+        e = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg, font=("Arial", 10))
+        e.pack(pady=5, padx=20)
+        e.focus_set() # Para poder escribir directamente
 
         def guardar():
+            nombre = e.get().strip()
+            if not nombre:
+                messagebox.showwarning("Atención", "El nombre no puede estar vacío")
+                return
+                
             conn = conexion()
             cur = conn.cursor()
-            cur.execute("INSERT INTO recetas (nombre) VALUES (?)", (e.get(),))
+            cur.execute("INSERT INTO recetas (nombre) VALUES (?)", (nombre,))
             conn.commit()
             conn.close()
             win.destroy()
             self.cargar()
 
-        tk.Button(
-            win,
-            text="Guardar",
-            command=guardar,
-            bg=btn_bg,
-            fg="white",
-            bd=0,
-            padx=10,
-            pady=6,
-            cursor="hand2"
-        ).pack(pady=15)
+        tk.Button(win, text="Guardar", command=guardar, bg="#4CAF50", fg="white", 
+                  bd=0, padx=15, pady=6, cursor="hand2").pack(pady=15)
 
     def editar_receta(self):
         sel = self.tree.selection()
         if not sel:
             return
 
-        rid, nombre = self.tree.item(sel[0])["values"]
+        rid, nombre_antiguo = self.tree.item(sel[0])["values"]
 
         win = tk.Toplevel(self)
-        e = tk.Entry(win)
-        e.insert(0, nombre)
-        e.pack()
+        win.title(f"Editando: {nombre_antiguo}")
+        win.geometry("300x180")
+
+        modo = self.controller.modo_oscuro
+        bg, fg, entry_bg = ("#121212", "white", "#2E2E2E") if modo else ("#F0F0F0", "black", "white")
+        win.configure(bg=bg)
+
+        tk.Label(win, text="Nuevo nombre:", bg=bg, fg=fg, font=("Arial", 10, "bold")).pack(pady=(20, 5))
+        e = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg, font=("Arial", 10))
+        e.insert(0, nombre_antiguo)
+        e.pack(pady=5, padx=20)
 
         def guardar():
-            conn = conexion()
-            cur = conn.cursor()
-            cur.execute("UPDATE recetas SET nombre=? WHERE id=?", (e.get(), rid))
-            conn.commit()
-            conn.close()
-            win.destroy()
-            self.cargar()
+            nuevo_nombre = e.get().strip()
+            if nuevo_nombre:
+                conn = conexion()
+                cur = conn.cursor()
+                cur.execute("UPDATE recetas SET nombre=? WHERE id=?", (nuevo_nombre, rid))
+                conn.commit()
+                conn.close()
+                win.destroy()
+                self.cargar()
 
-        tk.Button(win, text="Guardar", command=guardar).pack()
+        tk.Button(win, text="Actualizar", command=guardar, bg="#FF9800", fg="white", 
+                  bd=0, padx=15, pady=6, cursor="hand2").pack(pady=15)
+        
 
     def borrar_receta(self):
         sel = self.tree.selection()
         if not sel:
             return
 
+        if not messagebox.askyesno("Confirmar", "¿Eliminar esta receta?"):
+            return
+
         rid = self.tree.item(sel[0])["values"][0]
 
-        conn = conexion()
-        cur = conn.cursor()
-        cur.execute("DELETE FROM recetas WHERE id=?", (rid,))
-        cur.execute("DELETE FROM receta_ingredientes WHERE receta_id=?", (rid,))
-        conn.commit()
-        conn.close()
+        conn = None # Inicializamos para evitar errores en el finally
+        try:
+            conn = conexion()
+            cur = conn.cursor()
+            
+            # 1. Borrar dependencias primero
+            cur.execute("DELETE FROM receta_ingredientes WHERE receta_id=?", (rid,))
+            # 2. Borrar la receta
+            cur.execute("DELETE FROM recetas WHERE id=?", (rid,))
+            
+            conn.commit()
+            print("Borrado exitoso.")
 
+        except Exception as e:
+            print(f"Error al borrar: {e}")
+            if conn:
+                conn.rollback() # Si falla, deshacemos los cambios
+            messagebox.showerror("Error", f"No se pudo borrar: {e}")
+        
+        finally:
+            if conn:
+                conn.close() # 🔑 ¡ESTO ES LO MÁS IMPORTANTE!
+                print("Conexión cerrada.")
+
+        # Limpiar y recargar
+        self.tree_ing.delete(*self.tree_ing.get_children())
         self.cargar()
 
     def usar_receta(self):
@@ -317,119 +350,183 @@ class RecetasFrame(tk.Frame):
 
     # =====================================================
     # INGREDIENTES
+    # =====================================================
     def anadir_ingrediente(self):
-        sel = self.tree.selection()
-        if not sel:
-            return
-
-        rid = self.tree.item(sel[0])["values"][0]
-
-        win = tk.Toplevel(self)
-        win.title("Añadir ingrediente")
-
-        modo = self.controller.modo_oscuro
-        bg = "#121212" if modo else "#F0F0F0"
-        fg = "white" if modo else "black"
-        btn_bg = "#4CAF50" if modo else "#2E7D32"
-
-        win.configure(bg=bg)
-
-        # ===== PRODUCTOS =====
-        conn = conexion()
-        cur = conn.cursor()
-        cur.execute("SELECT id, nombre, unidad FROM productos")
-        productos = cur.fetchall()
-        conn.close()
-
-        opciones = {
-            f"{nombre} ({unidad})": (pid, unidad)
-            for pid, nombre, unidad in productos
-        }
-
-        tk.Label(win, text="Producto", bg=bg, fg=fg).pack(pady=(10, 0))
-
-        combo = ttk.Combobox(
-            win,
-            values=list(opciones.keys()),
-            state="readonly",
-            width=30
-        )
-        combo.pack(pady=5)
-
-        tk.Label(win, text="Cantidad", bg=bg, fg=fg).pack(pady=(10, 0))
-
-        c = tk.Entry(
-            win,
-            bg="#2E2E2E" if modo else "white",
-            fg=fg,
-            insertbackground=fg
-        )
-        c.pack(pady=5)
-
-        def guardar():
-            if not combo.get():
+            sel = self.tree.selection()
+            if not sel:
+                messagebox.showwarning("Atención", "Selecciona primero una receta a la que añadir ingredientes.")
                 return
 
-            producto_id, unidad = opciones[combo.get()]
+            rid = self.tree.item(sel[0])["values"][0]
 
+            win = tk.Toplevel(self)
+            win.title("Añadir ingrediente")
+            win.geometry("300x350") # Un tamaño fijo queda más ordenado
+
+            modo = self.controller.modo_oscuro
+            bg = "#121212" if modo else "#F0F0F0"
+            fg = "white" if modo else "black"
+            entry_bg = "#2E2E2E" if modo else "white"
+            btn_bg = "#4CAF50"
+
+            win.configure(bg=bg)
+
+            # ===== CARGAR PRODUCTOS =====
             conn = conexion()
             cur = conn.cursor()
-
-            cur.execute("""
-                SELECT 1 FROM receta_ingredientes
-                WHERE receta_id=? AND producto_id=?
-            """, (rid, producto_id))
-
-            if cur.fetchone():
-                messagebox.showerror("Error", "Ese ingrediente ya existe en esta receta")
-                conn.close()
-                return
-
-            cur.execute("""
-                INSERT INTO receta_ingredientes
-                (receta_id, producto_id, cantidad, unidad)
-                VALUES (?,?,?,?)
-            """, (rid, producto_id, c.get(), unidad))
-
-            conn.commit()
+            cur.execute("SELECT id, nombre, unidad FROM productos ORDER BY nombre ASC")
+            productos = cur.fetchall()
             conn.close()
 
-            win.destroy()
-            self.cargar_ingredientes(rid)
+            opciones = {
+                f"{nombre} ({unidad})": (pid, unidad)
+                for pid, nombre, unidad in productos
+            }
 
-        tk.Button(win, text="Guardar", command=guardar, bg=btn_bg, fg="white").pack(pady=10)
+            # --- UI ---
+            tk.Label(win, text="Seleccionar Producto", bg=bg, fg=fg, font=("Arial", 10, "bold")).pack(pady=(15, 0))
+            
+            combo = ttk.Combobox(
+                win,
+                values=list(opciones.keys()),
+                state="readonly",
+                width=30
+            )
+            combo.pack(pady=10)
+
+            tk.Label(win, text="Cantidad", bg=bg, fg=fg, font=("Arial", 10, "bold")).pack(pady=(10, 0))
+            
+            c = tk.Entry(
+                win,
+                bg=entry_bg,
+                fg=fg,
+                insertbackground=fg,
+                font=("Arial", 10)
+            )
+            c.pack(pady=5)
+
+            def guardar():
+                # 1. Validar producto seleccionado
+                seleccion = combo.get()
+                if not seleccion:
+                    messagebox.showwarning("Faltan datos", "Por favor, selecciona un producto.")
+                    return
+
+                # 2. Validar cantidad (que no esté vacía)
+                cantidad = c.get().strip()
+                if not cantidad:
+                    messagebox.showwarning("Faltan datos", "Introduce una cantidad.")
+                    return
+
+                producto_id, unidad = opciones[seleccion]
+
+                conn = conexion()
+                cur = conn.cursor()
+
+                # 3. Evitar duplicados (¡Esto ya lo tenías y es genial!)
+                cur.execute("""
+                    SELECT 1 FROM receta_ingredientes
+                    WHERE receta_id=? AND producto_id=?
+                """, (rid, producto_id))
+
+                if cur.fetchone():
+                    messagebox.showerror("Error", "Ese ingrediente ya existe en esta receta.")
+                    conn.close()
+                    return
+
+                try:
+                    cur.execute("""
+                        INSERT INTO receta_ingredientes
+                        (receta_id, producto_id, cantidad, unidad)
+                        VALUES (?,?,?,?)
+                    """, (rid, producto_id, cantidad, unidad))
+
+                    conn.commit()
+                    conn.close()
+                    win.destroy()
+                    self.cargar_ingredientes(rid) # Refrescamos la tabla de abajo
+                    
+                except Exception as e:
+                    messagebox.showerror("Error de BD", f"No se pudo guardar: {e}")
+
+            tk.Button(
+                win, 
+                text="Añadir a la Receta", 
+                command=guardar, 
+                bg=btn_bg, 
+                fg="white",
+                font=("Arial", 10, "bold"),
+                padx=20,
+                pady=8,
+                bd=0,
+                cursor="hand2"
+            ).pack(pady=25)
+
 
     def modificar_ingrediente(self):
         sel_r = self.tree.selection()
         sel_i = self.tree_ing.selection()
 
         if not sel_r or not sel_i:
+            messagebox.showwarning("Atención", "Selecciona una receta y un ingrediente")
             return
 
         rid = self.tree.item(sel_r[0])["values"][0]
         item = self.tree_ing.item(sel_i[0])
-
-        cant, unidad = item["values"][1], item["values"][2]
-        pid = item["tags"][0]
+        
+        # Obtenemos valores actuales
+        nombre_prod = item["values"][0]
+        cant_actual = item["values"][1]
+        unid_actual = item["values"][2]
+        pid = item["tags"][0] # ID del producto
 
         win = tk.Toplevel(self)
-        e1 = tk.Entry(win); e1.insert(0, cant); e1.pack()
-        e2 = tk.Entry(win); e2.insert(0, unidad); e2.pack()
+        win.title(f"Modificando: {nombre_prod}")
+        
+        # --- Configuración de colores (Sustituye a get_theme si no lo tienes) ---
+        modo = self.controller.modo_oscuro
+        bg = "#121212" if modo else "#F0F0F0"
+        fg = "white" if modo else "black"
+        entry_bg = "#2E2E2E" if modo else "white"
+        win.configure(bg=bg)
+
+        # Campo Cantidad
+        tk.Label(win, text="Nueva Cantidad:", bg=bg, fg=fg).pack(pady=(10, 0))
+        e1 = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg)
+        e1.insert(0, cant_actual)
+        e1.pack(pady=5, padx=20)
+
+        # Campo Unidad
+        tk.Label(win, text="Nueva Unidad:", bg=bg, fg=fg).pack(pady=(10, 0))
+        e2 = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg)
+        e2.insert(0, unid_actual)
+        e2.pack(pady=5, padx=20)
 
         def guardar():
-            conn = conexion()
-            cur = conn.cursor()
-            cur.execute("""
-                UPDATE receta_ingredientes
-                SET cantidad=?, unidad=?
-                WHERE receta_id=? AND producto_id=?
-            """, (e1.get(), e2.get(), rid, pid))
-            conn.commit()
-            conn.close()
-            win.destroy()
-            self.cargar_ingredientes(rid)
+            try:
+                nueva_cant = e1.get()
+                nueva_unid = e2.get()
+                
+                conn = conexion()
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE receta_ingredientes
+                    SET cantidad=?, unidad=?
+                    WHERE receta_id=? AND producto_id=?
+                """, (nueva_cant, nueva_unid, rid, pid))
+                
+                conn.commit()
+                conn.close()
+                
+                win.destroy()
+                self.cargar_ingredientes(rid) # Refrescar la tabla
+            except Exception as error:
+                messagebox.showerror("Error", f"No se pudo actualizar: {error}")
 
-        tk.Button(win, text="Guardar", command=guardar).pack()
+        tk.Button(
+            win, text="Guardar Cambios", command=guardar,
+            bg="#FF9800", fg="white", bd=0, padx=15, pady=7, cursor="hand2"
+        ).pack(pady=20)
 
     def eliminar_ingrediente(self):
         sel_r = self.tree.selection()
