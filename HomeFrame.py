@@ -83,33 +83,38 @@ class HomeFrame(tk.Frame):
             "pady": 10
         }
 
-        # Importamos las clases aquí localmente para evitar errores de importación circular al iniciar
+        # Importaciones locales para evitar errores
         from InventarioFrame import InventarioFrame
         from RecetasFrame import RecetasFrame
         from ListaFrame import ListaFrame
+        from RecetasPendientesFrame import RecetasPendientesFrame # 👈 ¡Añade esta línea!
 
-        # Creamos los botones con sus comandos
+        # --- LISTA DE BOTONES ---
         tk.Button(
-            frame_botones, 
-            text="📦 Inventario", 
+            frame_botones, text="📦 Inventario", 
             command=lambda: self.controller.show_frame(InventarioFrame), 
             **boton_estilo
         ).pack(pady=10)
 
         tk.Button(
-            frame_botones, 
-            text="🍳 Recetas", 
+            frame_botones, text="🍳 Recetas", 
             command=lambda: self.controller.show_frame(RecetasFrame), 
             **boton_estilo
         ).pack(pady=10)
 
+        # 📅 ESTE ES EL BOTÓN DEL PLANIFICADOR
         tk.Button(
-            frame_botones, 
-            text="🛒 Lista de compra", 
-            command=lambda: self.controller.show_frame(ListaFrame), 
+            frame_botones, text="📅 Planificador", 
+            command=lambda: self.controller.show_frame(RecetasPendientesFrame), 
             **boton_estilo
         ).pack(pady=10)
 
+        tk.Button(
+            frame_botones, text="🛒 Lista de compra", 
+            command=lambda: self.controller.show_frame(ListaFrame), 
+            **boton_estilo
+        ).pack(pady=10)
+        
     def _load_logo(self):
         """Carga la imagen del logo usando ruta robusta"""
         try:

@@ -134,3 +134,5 @@ def obtener_recetas():
     recetas = cursor.fetchall()
     conn.close()
     return recetas
+
+

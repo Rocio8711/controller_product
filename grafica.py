@@ -7,6 +7,7 @@ from HomeFrame import HomeFrame
 from InventarioFrame import InventarioFrame
 from RecetasFrame import RecetasFrame
 from ListaFrame import ListaFrame
+from RecetasPendientesFrame import RecetasPendientesFrame
 
 # 2. Imports de tus módulos de lógica
 from lista_compras import marcar_comprado, ver_tareas_todas
@@ -43,7 +44,7 @@ class App(tk.Tk):
 
         self.frames = {}
         # Aquí se crean las instancias de las clases importadas
-        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame):
+        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame,RecetasPendientesFrame):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")

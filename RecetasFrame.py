@@ -96,7 +96,7 @@ class RecetasFrame(tk.Frame):
         tk.Button(self.frame_recetas, text="➕ Nueva", command=self.crear_receta, bg="#4CAF50", fg="white").grid(row=0, column=1, padx=5)
         tk.Button(self.frame_recetas, text="✏️ Modificar", command=self.modificar_receta, bg="#FF9800", fg="white").grid(row=0, column=2, padx=5)
         tk.Button(self.frame_recetas, text="🗑️ Borrar", command=self.borrar_receta, bg="#F44336", fg="white").grid(row=0, column=3, padx=5)
-        tk.Button(self.frame_recetas, text="📝 Usar", command=self.usar_receta, bg="#2196F3", fg="white").grid(row=0, column=4, padx=5)
+        tk.Button(self.frame_recetas, text="📝 Añadir a Lista de Pendientes", command=self.usar_receta, bg="#2196F3", fg="white").grid(row=0, column=4, padx=5)
 
         # =========================
         # INGREDIENTES
@@ -343,11 +343,31 @@ class RecetasFrame(tk.Frame):
     def usar_receta(self):
         sel = self.tree.selection()
         if not sel:
+            messagebox.showwarning("Atención", "Selecciona una receta.")
             return
 
         rid = self.tree.item(sel[0])["values"][0]
-        generar_lista_desde_receta(rid)
+        nombre_receta = self.tree.item(sel[0])["values"][1]
 
+        try:
+            # 1. Tu lógica de recetas.py: Generar lista de compra inteligente
+            # (Solo añade lo que falta según el stock real)
+            generar_lista_desde_receta(rid)
+
+            # 2. Registrar en el Planificador (recetas_pendientes)
+            conn = conexion()
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO recetas_pendientes (receta_id, fecha_planificada, completada)
+                VALUES (?, date('now', 'localtime'), 0)
+            """, (rid,))
+            conn.commit()
+            conn.close()
+
+            messagebox.showinfo("Éxito", f"'{nombre_receta}' lista para cocinar.\nSe han revisado los ingredientes en la lista de compra.")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Hubo un problema: {e}")
     # =====================================================
     # INGREDIENTES
     # =====================================================
@@ -475,38 +495,45 @@ class RecetasFrame(tk.Frame):
         item = self.tree_ing.item(sel_i[0])
         
         # Obtenemos valores actuales
-        nombre_prod = item["values"][0]
-        cant_actual = item["values"][1]
-        unid_actual = item["values"][2]
-        pid = item["tags"][0] # ID del producto
+        valores = item["values"]
+        nombre_prod = valores[0]
+        cant_actual = valores[1]
+        unid_actual = valores[2]
+        
+        # IMPORTANTE: El ID del producto está en el primer tag
+        pid = item["tags"][0] 
 
         win = tk.Toplevel(self)
         win.title(f"Modificando: {nombre_prod}")
-        
-        # --- Configuración de colores (Sustituye a get_theme si no lo tienes) ---
+        win.geometry("300x250") # Añadido un tamaño base
+
         modo = self.controller.modo_oscuro
         bg = "#121212" if modo else "#F0F0F0"
         fg = "white" if modo else "black"
         entry_bg = "#2E2E2E" if modo else "white"
         win.configure(bg=bg)
 
-        # Campo Cantidad
-        tk.Label(win, text="Nueva Cantidad:", bg=bg, fg=fg).pack(pady=(10, 0))
+        tk.Label(win, text=f"Producto: {nombre_prod}", bg=bg, fg="#4CAF50", font=("Arial", 10, "bold")).pack(pady=10)
+
+        tk.Label(win, text="Nueva Cantidad:", bg=bg, fg=fg).pack(pady=(5, 0))
         e1 = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg)
         e1.insert(0, cant_actual)
         e1.pack(pady=5, padx=20)
 
-        # Campo Unidad
-        tk.Label(win, text="Nueva Unidad:", bg=bg, fg=fg).pack(pady=(10, 0))
+        tk.Label(win, text="Nueva Unidad:", bg=bg, fg=fg).pack(pady=(5, 0))
         e2 = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg)
         e2.insert(0, unid_actual)
         e2.pack(pady=5, padx=20)
 
         def guardar():
             try:
-                nueva_cant = e1.get()
-                nueva_unid = e2.get()
+                nueva_cant = e1.get().strip()
+                nueva_unid = e2.get().strip()
                 
+                if not nueva_cant:
+                    messagebox.showwarning("Error", "La cantidad no puede estar vacía.")
+                    return
+
                 conn = conexion()
                 cur = conn.cursor()
                 cur.execute("""
@@ -519,7 +546,7 @@ class RecetasFrame(tk.Frame):
                 conn.close()
                 
                 win.destroy()
-                self.cargar_ingredientes(rid) # Refrescar la tabla
+                self.cargar_ingredientes(rid) 
             except Exception as error:
                 messagebox.showerror("Error", f"No se pudo actualizar: {error}")
 
