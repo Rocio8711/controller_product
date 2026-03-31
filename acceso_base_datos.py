@@ -63,12 +63,12 @@ def crear_tablas():
             cantidad REAL NOT NULL,
             unidad TEXT NOT NULL,
             FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE,
-            FOREIGN KEY (producto_id) REFERENCES productos(id),
+            FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
             UNIQUE(receta_id, producto_id)
         )
         """)
 
-        # 5. LISTA COMPRAS
+        # 5. LISTA COMPRAS (Corregida con CASCADE)
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS lista_compras (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,8 +77,8 @@ def crear_tablas():
             unidad TEXT NOT NULL,
             comprado INTEGER DEFAULT 0,
             usuario_id_asignado INTEGER,
-            FOREIGN KEY (producto_id) REFERENCES productos(id),
-            FOREIGN KEY (usuario_id_asignado) REFERENCES usuarios(id)
+            FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE, -- 👈 AQUÍ
+            FOREIGN KEY (usuario_id_asignado) REFERENCES usuarios(id) ON DELETE SET NULL
         )
         """)
 

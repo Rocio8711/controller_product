@@ -258,11 +258,67 @@ class RecetasPendientesFrame(tk.Frame):
     def eliminar_pendiente(self):
         seleccion = self.tree.selection()
         if not seleccion: return
-        item_id = self.tree.item(seleccion[0])["values"][0]
-        if messagebox.askyesno("Confirmar", "¿Eliminar del planificador?"):
-            conn = conexion()
-            cur = conn.cursor()
-            cur.execute("DELETE FROM recetas_pendientes WHERE id = ?", (item_id,))
-            conn.commit()
-            conn.close()
-            self.cargar()
+        
+        # 1. Obtener IDs
+        item_plan_id = self.tree.item(seleccion[0])["values"][0]
+        receta_id_a_borrar = self.tree.item(seleccion[0])["values"][4]
+
+        if messagebox.askyesno("Confirmar", "¿Quitar del plan?\nSe recalculará la lista de compras."):
+            conn = None
+            try:
+                conn = conexion()
+                cur = conn.cursor()
+
+                # A. Obtener productos que usa la receta que vamos a quitar
+                cur.execute("SELECT producto_id FROM receta_ingredientes WHERE receta_id = ?", (receta_id_a_borrar,))
+                productos_afectados = [p[0] for p in cur.fetchall()]
+
+                # B. BORRAR LA RECETA PRIMERO
+                cur.execute("DELETE FROM recetas_pendientes WHERE id = ?", (item_plan_id,))
+                print(f"DEBUG: Receta {receta_id_a_borrar} eliminada del plan.")
+
+                # C. RECALCULAR CADA PRODUCTO AFECTADO
+                for p_id in productos_afectados:
+                    # Sumar lo que piden las recetas que QUEDAN en el planificador
+                    cur.execute("""
+                        SELECT SUM(ri.cantidad) 
+                        FROM receta_ingredientes ri
+                        JOIN recetas_pendientes rp ON ri.receta_id = rp.receta_id
+                        WHERE ri.producto_id = ? AND rp.completada = 0
+                    """, (p_id,))
+                    res_sum = cur.fetchone()[0]
+                    total_recetas_restantes = res_sum if res_sum is not None else 0
+
+                    # Obtener stock actual y mínimo
+                    cur.execute("SELECT nombre, cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (p_id,))
+                    nombre_p, stock_actual, stock_min, unidad_p = cur.fetchone()
+
+                    # CÁLCULO: (Lo que piden las recetas + El mínimo) - Lo que ya tengo
+                    # Ejemplo Pollo: (5 de Receta B + 5 Mínimo) - 2 en Stock = 8 a comprar.
+                    necesidad_total = total_recetas_restantes + stock_min
+                    cantidad_comprar = round(max(0, necesidad_total - stock_actual), 2)
+                    
+                    print(f"DEBUG: Producto: {nombre_p} | Necesidad Total: {necesidad_total} | Stock: {stock_actual} | Comprar: {cantidad_comprar}")
+
+                    # D. ACTUALIZAR LISTA DE COMPRAS
+                    # Primero borramos cualquier rastro previo de este producto "no comprado"
+                    cur.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
+                    
+                    # Si todavía falta algo por comprar, lo insertamos de nuevo
+                    if cantidad_comprar > 0:
+                        cur.execute("""
+                            INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
+                            VALUES (?, ?, ?, 0)
+                        """, (p_id, cantidad_comprar, unidad_p))
+                        print(f"DEBUG: Insertado en lista_compras: {nombre_p} x {cantidad_comprar}")
+
+                conn.commit() # ¡FUNDAMENTAL!
+                messagebox.showinfo("Éxito", "Lista de compras sincronizada.")
+                self.cargar()
+
+            except Exception as e:
+                if conn: conn.rollback()
+                print(f"ERROR CRÍTICO: {e}")
+                messagebox.showerror("Error", f"No se pudo actualizar: {e}")
+            finally:
+                if conn: conn.close()

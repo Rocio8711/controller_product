@@ -360,82 +360,66 @@ class RecetasFrame(tk.Frame):
             conn = conexion()
             cur = conn.cursor()
 
-            # ✅ CORREGIDO: p.stock_minimo coincide ahora con tu CREATE TABLE
-            cur.execute("""
-                SELECT ri.producto_id, p.nombre, ri.cantidad, p.cantidad, p.unidad, p.stock_minimo
-                FROM receta_ingredientes ri
-                JOIN productos p ON ri.producto_id = p.id
-                WHERE ri.receta_id = ?
-            """, (rid,))
-            
-            ingredientes = cur.fetchall()
-            if not ingredientes:
-                messagebox.showwarning("Atención", "Esta receta no tiene ingredientes.")
-                conn.close()
-                return
-
-            items_anadidos = []
-
-            for p_id, p_nombre, cant_nec, stock_act, unidad, stock_min in ingredientes:
-                try:
-                    # 🛡️ Limpieza total para evitar errores de 'str' a 'float'
-                    # Si el campo está vacío o es None, usamos "0.0"
-                    n_necesaria = float(str(cant_nec).strip().replace(',', '.')) if cant_nec else 0.0
-                    
-                    raw_stock = float(str(stock_act).strip().replace(',', '.')) if stock_act else 0.0
-                    n_stock = max(0.0, raw_stock) # Filtro para el aceite -2.0
-                    
-                    n_minimo = float(str(stock_min).strip().replace(',', '.')) if stock_min else 0.0
-                except (ValueError, TypeError):
-                    n_necesaria = n_stock = n_minimo = 0.0
-
-                # 💡 Lógica de Stock Mínimo
-                stock_proyectado = n_stock - n_necesaria
-
-                if stock_proyectado < n_minimo:
-                    # Calculamos cuánto falta para cubrir la receta y quedar en el mínimo
-                    faltante = round((n_necesaria + n_minimo) - n_stock, 2)
-                    
-                    if faltante > 0:
-                        cur.execute("SELECT id, cantidad FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
-                        existe = cur.fetchone()
-                        
-                        if existe:
-                            try:
-                                cant_previa = float(str(existe[1]).replace(',', '.'))
-                                nueva_cant = round(cant_previa + faltante, 2)
-                                cur.execute("UPDATE lista_compras SET cantidad = ? WHERE id = ?", (nueva_cant, existe[0]))
-                            except: pass
-                        else:
-                            cur.execute("""
-                                INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
-                                VALUES (?, ?, ?, 0)
-                            """, (p_id, faltante, unidad))
-                        
-                        items_anadidos.append(f"- {p_nombre}: {faltante} {unidad}")
-
-            # Registrar la receta en pendientes
+            # 1. Insertar la receta en el planificador PRIMERO para que cuente en el SUM
             cur.execute("""
                 INSERT INTO recetas_pendientes (receta_id, fecha_planificada, completada)
                 VALUES (?, date('now', 'localtime'), 0)
             """, (rid,))
 
+            # 2. Obtener los productos que usa esta receta para recalcularlos
+            cur.execute("SELECT producto_id FROM receta_ingredientes WHERE receta_id = ?", (rid,))
+            productos_afectados = [p[0] for p in cur.fetchall()]
+
+            if not productos_afectados:
+                conn.commit()
+                messagebox.showinfo("Planificador", f"✅ '{nombre_receta}' añadida (no tiene ingredientes).")
+                conn.close()
+                return
+
+            items_necesarios_lista = []
+
+            # 3. RECALCULO GLOBAL PARA CADA PRODUCTO
+            for p_id in productos_afectados:
+                # A. Sumar lo que piden TODAS las recetas pendientes actualmente
+                cur.execute("""
+                    SELECT SUM(ri.cantidad) 
+                    FROM receta_ingredientes ri
+                    JOIN recetas_pendientes rp ON ri.receta_id = rp.receta_id
+                    WHERE ri.producto_id = ? AND rp.completada = 0
+                """, (p_id,))
+                total_necesario_recetas = cur.fetchone()[0] or 0
+
+                # B. Obtener Stock y Mínimo
+                cur.execute("SELECT nombre, cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (p_id,))
+                p_nombre, stock_act, stock_min, unidad = cur.fetchone()
+
+                # C. Cálculo Maestro: (Total Recetas + Mínimo) - Stock Actual
+                cantidad_final_compra = round(max(0, (total_necesario_recetas + stock_min) - stock_act), 2)
+
+                # D. Actualizar la tabla lista_compras (Borrar anterior y poner la nueva cifra total)
+                cur.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
+                
+                if cantidad_final_compra > 0:
+                    cur.execute("""
+                        INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
+                        VALUES (?, ?, ?, 0)
+                    """, (p_id, cantidad_final_compra, unidad))
+                    items_necesarios_lista.append(f"- {p_nombre}: {cantidad_final_compra} {unidad}")
+
             conn.commit()
             conn.close()
 
             mensaje = f"✅ '{nombre_receta}' añadida a pendientes."
-            if items_anadidos:
-                mensaje += "\n\n⚠️ Stock insuficiente o bajo mínimos. Añadido a la lista de compras:\n" + "\n".join(items_anadidos)
+            if items_necesarios_lista:
+                mensaje += "\n\n📋 Lista de compras actualizada (Total acumulado):\n" + "\n".join(items_necesarios_lista)
             else:
-                mensaje += "\n\n✨ Tienes stock suficiente para esta receta."
+                mensaje += "\n\n✨ Tienes stock suficiente para todo el plan actual."
                 
             messagebox.showinfo("Planificador", mensaje)
 
         except Exception as e:
-            if 'conn' in locals() and conn: conn.close()
-            messagebox.showerror("Error", f"Fallo crítico: {e}")
-
-            
+            if 'conn' in locals() and conn: conn.rollback(); conn.close()
+            messagebox.showerror("Error", f"Fallo crítico al añadir: {e}")
 
     # =====================================================
     # INGREDIENTES
