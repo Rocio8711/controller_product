@@ -94,3 +94,17 @@ def crear_tablas():
 
     conn.commit()
     conn.close()
+
+
+    # =========================
+    # 6. RECETAS PENDIENTES (PLANIFICADOR)
+    # =========================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS recetas_pendientes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        receta_id INTEGER NOT NULL,
+        fecha_planificada TEXT, 
+        completada INTEGER DEFAULT 0, -- 0: pendiente, 1: ya cocinada
+        FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE
+    )
+    """)                
