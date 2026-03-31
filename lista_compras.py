@@ -1,7 +1,7 @@
 from acceso_base_datos import conexion
 
 
-def mostrar_lista_comprass():
+def mostrar_lista_compras():
     conexion_bd = conexion()
     if not conexion_bd:
         return
@@ -9,7 +9,7 @@ def mostrar_lista_comprass():
     cursor = conexion_bd.cursor()
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad, u.nombre, lc.comprado
-        FROM lista_comprass lc
+        FROM lista_compras lc
         JOIN productos p ON lc.producto_id = p.id
         LEFT JOIN usuarios u ON lc.usuario_id_asignado = u.id
     """)
@@ -41,7 +41,7 @@ def marcar_comprado(item_id):
         # 1. Obtener datos de la lista
         cursor.execute("""
             SELECT producto_id, cantidad 
-            FROM lista_comprass 
+            FROM lista_compras 
             WHERE id = ? AND comprado = 0
         """, (item_id,))
 
@@ -55,7 +55,7 @@ def marcar_comprado(item_id):
 
         # 2. Marcar como comprado
         cursor.execute("""
-            UPDATE lista_comprass
+            UPDATE lista_compras
             SET comprado = 1
             WHERE id = ?
         """, (item_id,))
@@ -89,7 +89,7 @@ def ver_tareas_usuario(usuario_id):
     cursor = conexion_bd.cursor()
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad
-        FROM lista_comprass lc
+        FROM lista_compras lc
         JOIN productos p ON lc.producto_id = p.id
         WHERE lc.usuario_id_asignado = ? AND lc.comprado = 0
     """, (usuario_id,))
@@ -108,7 +108,7 @@ def ver_tareas_todas():
     cursor = conexion_bd.cursor()
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad
-        FROM lista_comprass lc
+        FROM lista_compras lc
         JOIN productos p ON lc.producto_id = p.id
         WHERE lc.comprado = 0
     """)
@@ -145,7 +145,7 @@ def generar_lista_desde_receta(receta_id):
 
                 # Verificar si ya existe en lista
                 cursor.execute("""
-                    SELECT id FROM lista_comprass 
+                    SELECT id FROM lista_compras 
                     WHERE producto_id = ? AND comprado = 0
                 """, (prod_id,))
 
@@ -153,13 +153,13 @@ def generar_lista_desde_receta(receta_id):
 
                 if existe:
                     cursor.execute("""
-                        UPDATE lista_comprass 
+                        UPDATE lista_compras 
                         SET cantidad = cantidad + ? 
                         WHERE id = ?
                     """, (faltante, existe[0]))
                 else:
                     cursor.execute("""
-                        INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado)
+                        INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
                         VALUES (?, ?, ?, 0)
                     """, (prod_id, faltante, unidad))
 

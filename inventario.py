@@ -27,7 +27,7 @@ def verificar_stock_minimo():
             # 🔥 IMPORTANTE: solo mirar pendientes (comprado = 0)
             cursor.execute("""
                 SELECT id, cantidad 
-                FROM lista_comprass 
+                FROM lista_compras 
                 WHERE producto_id = ? AND comprado = 0
             """, (producto_id,))
 
@@ -38,7 +38,7 @@ def verificar_stock_minimo():
 
                 # 🔥 SUMAR en vez de sobrescribir (evita perder datos)
                 cursor.execute("""
-                    UPDATE lista_comprass
+                    UPDATE lista_compras
                     SET cantidad = cantidad + ?
                     WHERE id = ?
                 """, (cantidad_a_comprar, lista_id))
@@ -46,7 +46,7 @@ def verificar_stock_minimo():
             else:
                 # Insertar nuevo en lista
                 cursor.execute("""
-                    INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado)
+                    INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
                     VALUES (?, ?, ?, 0)
                 """, (producto_id, cantidad_a_comprar, unidad))
 

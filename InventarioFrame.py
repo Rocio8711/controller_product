@@ -251,13 +251,13 @@ class InventarioFrame(tk.Frame):
             cant_minima = float(eminimo.get())
 
             if cant_minima > cant_actual:
-                cursor.execute("SELECT * FROM lista_comprass WHERE producto_id=? AND comprado=0", (p_id,))
+                cursor.execute("SELECT * FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
                 resultado = cursor.fetchall()
                 diferencia = cant_minima - cant_actual
                 if resultado:
-                    cursor.execute("UPDATE lista_comprass SET cantidad=? WHERE id=?", (diferencia, resultado[0][0]))
+                    cursor.execute("UPDATE lista_compras SET cantidad=? WHERE id=?", (diferencia, resultado[0][0]))
                 else:
-                    cursor.execute("INSERT INTO lista_comprass (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", 
+                    cursor.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", 
                                    (p_id, diferencia, eunidad.get()))
             
             conn.commit()
