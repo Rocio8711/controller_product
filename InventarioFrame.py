@@ -63,30 +63,44 @@ class InventarioFrame(tk.Frame):
         self.btn_volver.pack(pady=5)
 
         # ---------------------------------------------------------
-        # 📂 CONTENEDOR DE TABLA + SCROLLBAR
+        # 📂 CONTENEDOR MODERNO DE TABLA + SCROLLBAR
         # ---------------------------------------------------------
         self.frame_tabla = tk.Frame(self)
         self.frame_tabla.pack(fill="both", expand=True, padx=20, pady=15)
 
-        self.scrollbar = ttk.Scrollbar(self.frame_tabla, orient="vertical")
-        self.scrollbar.pack(side="right", fill="y")
+        scrollbar = tk.Scrollbar(self.frame_tabla)
+        scrollbar.pack(side="right", fill="y")
 
         columnas = ("ID", "Producto", "Cantidad", "Unidad", "Min")
-        self.tree = ttk.Treeview(
-            self.frame_tabla, 
-            columns=columnas, 
-            show="headings",
-            yscrollcommand=self.scrollbar.set
-        )
-        
-        self.scrollbar.config(command=self.tree.yview)
 
-        for col in columnas:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, anchor="center", width=120)
+        self.tree = ttk.Treeview(
+            self.frame_tabla,
+            columns=columnas,
+            show="headings",
+            yscrollcommand=scrollbar.set
+        )
+
+        scrollbar.config(command=self.tree.yview)
+
+        # 👇 columnas más limpias y modernas
+        self.tree.heading("ID", text="ID")
+        self.tree.column("ID", width=50, anchor="center")
+
+        self.tree.heading("Producto", text="Producto")
+        self.tree.column("Producto", width=220, anchor="center")
+
+        self.tree.heading("Cantidad", text="Cantidad")
+        self.tree.column("Cantidad", width=100, anchor="center")
+
+        self.tree.heading("Unidad", text="Unidad")
+        self.tree.column("Unidad", width=100, anchor="center")
+
+        self.tree.heading("Min", text="Min")
+        self.tree.column("Min", width=80, anchor="center")
+
         self.tree.pack(side="left", fill="both", expand=True)
 
-        # 🔹 Menú contextual
+        # 🔹 Menú contextual (igual que lo tienes)
         self.menu = tk.Menu(self, tearoff=0, font=("Segoe UI", 10, "bold"), bd=0)
         self.menu.add_command(label="➕   Añadir producto", command=self.abrir_agregar)
         self.menu.add_command(label="✏️   Editar producto", command=self.modificar_producto)
