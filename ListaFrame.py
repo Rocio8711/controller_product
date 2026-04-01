@@ -15,57 +15,45 @@ class ListaFrame(tk.Frame):
         self.setup_ui()
 
     def setup_ui(self):
-        # 🧹 Limpiamos el frame para que al alternar modo no se dupliquen widgets
+        # 🧹 Limpiamos el frame
         for widget in self.winfo_children():
             widget.destroy()
 
         modo = self.controller.modo_oscuro
         bg = "#121212" if modo else "#F0F0F0"
         fg = "white" if modo else "black"
-        
-        # Color verde para coherencia
         verde_fuerte = "#4CAF50" if modo else "#1B5E20"
-        verde_claro = "#333333" if modo else "#A5D6A7"
 
         self.configure(bg=bg)
 
-        # 🌙 BOTÓN TOGGLE (Igual que en RecetasFrame)
+        # 🌙 BOTÓN TOGGLE
         self.toggle_btn = tk.Button(
-            self,
-            text="☀️" if modo else "🌙",
+            self, text="☀️" if modo else "🌙",
             command=self.alternar_modo,
-            font=("Segoe UI Emoji", 14),
-            bd=0,
-            bg=bg,
-            fg=fg,
-            activebackground=bg,
-            cursor="hand2"
+            font=("Segoe UI Emoji", 14), bd=0, bg=bg, fg=fg,
+            activebackground=bg, cursor="hand2"
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
         # --- TÍTULO ---
-        self.label_titulo = tk.Label(
-            self, 
-            text="🛒 LISTA DE COMPRA", 
-            font=("Arial", 18, "bold"), 
-            bg=bg, 
-            fg=verde_fuerte, 
-            pady=15
-        )
-        self.label_titulo.pack()
+        tk.Label(
+            self, text="🛒 LISTA DE COMPRA", 
+            font=("Arial", 18, "bold"), bg=bg, fg=verde_fuerte
+        ).pack(pady=(15, 5))
 
-        # --- BOTÓN VOLVER ---
+        # --- BOTÓN VOLVER (SITUACIÓN IGUALADA) ---
         self.btn_volver = tk.Button(
-            self, 
-            text="⬅ Volver", 
+            self, text="⬅ Volver", 
             command=self.ir_a_home,
             font=("Arial", 10, "bold"),
-            bg=verde_claro,
-            fg="white" if modo else "black",
+            bg="#555555", # Gris coherente
+            fg="white",
+            width=12,     # Tamaño igualado
             bd=0,
-            padx=15,
-            pady=6,
-            cursor="hand2"
+            pady=5,       # Altura igualada
+            cursor="hand2",
+            activebackground="#333333",
+            activeforeground="white"
         )
         self.btn_volver.pack(pady=5)
 
@@ -87,36 +75,23 @@ class ListaFrame(tk.Frame):
         scrollbar.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # --- BOTONES DE ACCIÓN ---
+        # --- BOTONES DE ACCIÓN (Solo "Comprado") ---
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=20)
 
-        # Cargar
         tk.Button(
             btn_frame, 
-            text="🔄 Actualizar", 
-            command=self.cargar, 
-            bg="#757575", 
-            fg="white", 
-            width=15, 
-            bd=0, 
-            pady=8, 
-            cursor="hand2"
-        ).grid(row=0, column=0, padx=10)
-
-        # Comprado
-        tk.Button(
-            btn_frame, 
-            text="✅ Comprado", 
+            text="✅ Marcar como Comprado", 
             command=self.marcar, 
             bg="#4CAF50", 
             fg="white", 
-            font=("Arial", 10, "bold"),
-            width=15, 
+            font=("Arial", 10, "bold"), # Fuente estándar
+            width=22,                    # Ancho intermedio
             bd=0, 
-            pady=8, 
-            cursor="hand2"
-        ).grid(row=0, column=1, padx=10)
+            pady=6,                      # Menos altura (antes era 10)
+            cursor="hand2",
+            activebackground="#45a049"
+        ).pack() # Usamos pack para centrarlo al estar solo
 
         # Cargamos los datos al construir la interfaz
         self.cargar()

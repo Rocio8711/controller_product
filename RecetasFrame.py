@@ -56,10 +56,18 @@ class RecetasFrame(tk.Frame):
             self,
             text="⬅ Volver",
             command=self.ir_a_home,
-            bg="#333333" if modo else "#A5D6A7",
-            fg="white" if modo else "black"
+            bg="#555555",                 # Gris estándar como en los otros frames
+            fg="white",
+            font=("Arial", 10, "bold"),   # Tamaño de fuente igualado
+            width=12,                     # Ancho igualado
+            bd=0,
+            pady=5,                       # Altura interna igualada
+            cursor="hand2",
+            activebackground="#333333",
+            activeforeground="white"
         )
         self.btn_volver.pack(pady=5)
+        
 
         # =========================
         # RECETAS
@@ -95,7 +103,7 @@ class RecetasFrame(tk.Frame):
 
         tk.Button(self.frame_recetas, text="➕ Nueva", command=self.crear_receta, bg="#4CAF50", fg="white").grid(row=0, column=1, padx=5)
         tk.Button(self.frame_recetas, text="✏️ Modificar", command=self.modificar_receta, bg="#FF9800", fg="white").grid(row=0, column=2, padx=5)
-        tk.Button(self.frame_recetas, text="🗑️ Borrar", command=self.borrar_receta, bg="#F44336", fg="white").grid(row=0, column=3, padx=5)
+        tk.Button(self.frame_recetas, text="🗑️Borrar", command=self.borrar_receta, bg="#F44336", fg="white").grid(row=0, column=3, padx=5)
         tk.Button(self.frame_recetas, text="📝 Añadir a Lista de Pendientes", command=self.usar_receta, bg="#2196F3", fg="white").grid(row=0, column=4, padx=5)
 
         # =========================
@@ -145,7 +153,7 @@ class RecetasFrame(tk.Frame):
         tk.Button(self.frame_ing, text="✏️ Modificar", command=self.modificar_ingrediente,
                 bg="#FF9800", fg="white").grid(row=0, column=1, padx=5)
 
-        tk.Button(self.frame_ing, text="🗑️ Borrar", command=self.borrar_ingrediente,
+        tk.Button(self.frame_ing, text="🗑️Borrar", command=self.borrar_ingrediente,
                 bg="#F44336", fg="white").grid(row=0, column=2, padx=5)
 
 
@@ -155,7 +163,7 @@ class RecetasFrame(tk.Frame):
         self.menu_recetas = tk.Menu(self, tearoff=0)
         self.menu_recetas.add_command(label="➕ Nueva receta", command=self.crear_receta)
         self.menu_recetas.add_command(label="✏️ Modificar receta", command=self.modificar_receta)
-        self.menu_recetas.add_command(label="🗑️ Borrar receta", command=self.borrar_receta)
+        self.menu_recetas.add_command(label="🗑️Borrar receta", command=self.borrar_receta)
         self.menu_recetas.add_separator()
         self.menu_recetas.add_command(label="📝 Usar receta", command=self.usar_receta)
 
@@ -165,7 +173,7 @@ class RecetasFrame(tk.Frame):
         self.menu_ing = tk.Menu(self, tearoff=0)
         self.menu_ing.add_command(label="➕ Añadir", command=self.anadir_ingrediente)
         self.menu_ing.add_command(label="✏️ Modificar", command=self.modificar_ingrediente)
-        self.menu_ing.add_command(label="🗑️ Borrar", command=self.borrar_ingrediente)
+        self.menu_ing.add_command(label="🗑️Borrar", command=self.borrar_ingrediente)
 
     # =====================================================
     # POPUPS

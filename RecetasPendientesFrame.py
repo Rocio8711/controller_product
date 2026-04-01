@@ -39,7 +39,24 @@ class RecetasPendientesFrame(tk.Frame):
         tk.Label(
             self, text="📅 PLANIFICADOR DE COCINA", 
             font=("Arial", 18, "bold"), bg=bg, fg=verde_fuerte
-        ).pack(pady=10)
+        ).pack(pady=(10, 5)) # Reducimos un poco el pady inferior
+
+        # --- BOTÓN VOLVER (SITUACIÓN SUPERIOR) ---
+        # Lo colocamos justo debajo del título para que coincida con tu imagen
+        tk.Button(
+            self, 
+            text="⬅ Volver", 
+            command=self.ir_a_home, 
+            bg="#555555", 
+            fg="white", 
+            font=("Arial", 10, "bold"), # Fuente más pequeña como en la captura
+            width=12, 
+            bd=0, 
+            pady=5, 
+            cursor="hand2",
+            activebackground="#333333",
+            activeforeground="white"
+        ).pack(pady=5)
 
         # =====================================================
         # PANEL SUPERIOR: TABLA DE RECETAS PLANIFICADAS
@@ -104,32 +121,37 @@ class RecetasPendientesFrame(tk.Frame):
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=10)
 
-        # Botón Cocinar (se activa solo si hay stock suficiente)
+        # Botón Cocinar se activa dependiendo ingredientes
         self.btn_cocinar = tk.Button(
-            btn_frame, text="✅ Cocinar Ahora", 
+            btn_frame, 
+            text="✅ Cocinar Ahora", 
             command=self.ejecutar_cocinado, 
-            bg="#4CAF50", fg="white", width=20, 
-            state="disabled", font=("Arial", 10, "bold"),
-            cursor="hand2", bd=0, pady=5
+            bg="#4CAF50", 
+            fg="white", 
+            width=18,                    # <--- Ancho igualado
+            state="disabled", 
+            font=("Arial", 10, "bold"),
+            cursor="hand2", 
+            bd=0, 
+            pady=6                       # <--- Altura igualada
         )
         self.btn_cocinar.grid(row=0, column=0, padx=10)
 
         # Botón Eliminar
         tk.Button(
-            btn_frame, text="🗑️ Quitar del Plan", 
+            btn_frame, 
+            text="🗑️Quitar del Plan", 
             command=self.eliminar_pendiente, 
-            bg="#F44336", fg="white", width=18, 
-            bd=0, pady=5, cursor="hand2"
+            bg="#F44336", 
+            fg="white", 
+            width=18,                    # <--- Ancho igualado
+            font=("Arial", 10, "bold"),  # <--- Fuente igualada
+            bd=0, 
+            pady=6,                      # <--- Altura igualada
+            cursor="hand2"
         ).grid(row=0, column=1, padx=10)
 
-        # Botón Volver
-        tk.Button(
-            btn_frame, text="⬅ Volver", 
-            command=self.ir_a_home, 
-            bg="#555555", fg="white", width=12,
-            bd=0, pady=5, cursor="hand2"
-        ).grid(row=0, column=2, padx=10)
-
+        
         # Cargar los datos iniciales de la base de datos
         self.cargar()
 
