@@ -55,7 +55,7 @@ class InventarioFrame(tk.Frame):
 
         # 4. Botón Volver
         tk.Button(
-            self, text="⬅ Volver al Inicio",
+            self, text="⬅ Volver",
             font=("Segoe UI", 10, "bold"),
             bg="#444444" if modo else "#E0E0E0",
             fg="white" if modo else "black",

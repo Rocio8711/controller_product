@@ -57,7 +57,7 @@ class ListaFrame(tk.Frame):
         # --- BOTÓN VOLVER ---
         self.btn_volver = tk.Button(
             self, 
-            text="⬅ Volver al Inicio", 
+            text="⬅ Volver", 
             command=self.ir_a_home,
             font=("Arial", 10, "bold"),
             bg=verde_claro,
