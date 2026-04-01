@@ -121,9 +121,18 @@ class LoginApp:
         # fondo invisible
         toast.configure(bg=self.root["bg"])
 
+        #centramos el mensaje de bienvenida al centro
         self.root.update_idletasks()
-        x = self.root.winfo_x() + (self.root.winfo_width() // 2) - 140
-        y = self.root.winfo_y() + 30
+
+        toast.update_idletasks()
+
+        w = toast.winfo_reqwidth()
+        h = toast.winfo_reqheight()
+
+        x = self.root.winfo_x() + (self.root.winfo_width() // 2) - (w // 2)
+        y = self.root.winfo_y() + (self.root.winfo_height() // 2) - (h // 2)
+
+        toast.geometry(f"+{int(x)}+{int(y)}")
 
         toast.geometry(f"+{int(x)}+{int(y)}")
 
