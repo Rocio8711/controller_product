@@ -118,38 +118,37 @@ class RecetasPendientesFrame(tk.Frame):
         # =====================================================
         # BOTONERA FINAL
         # =====================================================
+
+        # =====================================================
+        # BOTONERA FINAL (USANDO PACK PARA IGUALAR TAMAÑOS)
+        # =====================================================
+        # Creamos un frame para contener los dos botones alineados
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=10)
 
-        # Botón Cocinar se activa dependiendo ingredientes
+        # Botón Cocinar
         self.btn_cocinar = tk.Button(
-            btn_frame,
-            text="✅ Cocinar Ahora",
-            command=self.ejecutar_cocinado,
-            bg="#4CAF50",
-            fg="white",
-            width=18,
+            btn_frame, 
+            text="Cocinar Ahora", # Quitamos el emoji para que no estire la altura
+            command=self.ejecutar_cocinado, 
+            bg="#333333", 
+            fg="white", 
             state="disabled",
-            font=("Arial", 10, "bold"),
-            cursor="hand2",
-            bd=0,
-            pady=6
+            width=15
         )
-        self.btn_cocinar.grid(row=0, column=0, padx=10)
+        self.btn_cocinar.pack(side="left", padx=10)
+        # Usamos side="left" para que se pongan uno al lado del otro
+
 
         # Botón Eliminar
         tk.Button(
-            btn_frame,
-            text="🗑️Quitar del Plan",
-            command=self.eliminar_pendiente,
-            bg="#F44336",
+            btn_frame, 
+            text="🗑️Quitar del Plan", 
+            command=self.eliminar_pendiente, 
+            bg="#F44336", 
             fg="white",
-            width=18,
-            font=("Arial", 10, "bold"),
-            pady=6,
-            bd=0,
-            cursor="hand2"
-        ).grid(row=0, column=1, padx=10)
+            width=15
+        ).pack(side="left", padx=5)
 
         
         # Cargar los datos iniciales de la base de datos
