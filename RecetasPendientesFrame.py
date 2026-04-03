@@ -36,10 +36,27 @@ class RecetasPendientesFrame(tk.Frame):
         self.toggle_btn.place(relx=0.98, rely=0.01, anchor="ne")
 
         # --- TÍTULO PRINCIPAL ---
+        # --- CONTENEDOR DEL TÍTULO (Planificador) ---
+        header_planificador = tk.Frame(self, bg=bg)
+        header_planificador.pack(pady=(10, 5))
+
+        # 1. El Icono del Calendario (Rojo "Calendario")
         tk.Label(
-            self, text="📅 PLANIFICADOR DE COCINA", 
-            font=("Arial", 18, "bold"), bg=bg, fg=verde_fuerte
-        ).pack(pady=(10, 5)) # Reducimos un poco el pady inferior
+            header_planificador, 
+            text="📅",
+            font=("Segoe UI Emoji", 22), 
+            bg=bg, 
+            fg="#C62828"  # Rojo vibrante para resaltar fechas
+        ).pack(side="left", padx=5)
+
+        # 2. El Texto del Título (Verde Fuerte)
+        tk.Label(
+            header_planificador, 
+            text="PLANIFICADOR DE COCINA",
+            font=("Arial", 18, "bold"),
+            bg=bg, 
+            fg=verde_fuerte
+        ).pack(side="left")
 
         # --- BOTÓN VOLVER (SITUACIÓN SUPERIOR) ---
 

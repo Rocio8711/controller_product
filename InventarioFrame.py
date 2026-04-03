@@ -52,7 +52,7 @@ class InventarioFrame(tk.Frame):
 
         # 2. El ícono en MARRÓN
         tk.Label(
-            header_frame, text="📦",
+            header_frame, text="📋",
             font=("Calibri", 24),
             bg=bg_main, 
             fg="#8B4513"  # Marrón para la caja

@@ -42,14 +42,27 @@ class RecetasFrame(tk.Frame):
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
         # título
-        self.label_titulo = tk.Label(
-            self,
-            text="🍳 RECETARIO",
+        # --- CONTENEDOR DEL TÍTULO (Recetario) ---
+        header_recetario = tk.Frame(self, bg=bg)
+        header_recetario.pack(pady=10)
+
+        # 1. El Icono de la Sartén (Gris Metálico Oscuro)
+        tk.Label(
+            header_recetario, 
+            text="🍳",
+            font=("Segoe UI Emoji", 22), 
+            bg=bg, 
+            fg="#37474F"  # Gris oscuro tipo sartén de hierro
+        ).pack(side="left", padx=5)
+
+        # 2. El Texto del Título (Verde)
+        tk.Label(
+            header_recetario, 
+            text="RECETARIO",
             font=("Arial", 18, "bold"),
-            bg=bg,
+            bg=bg, 
             fg="#4CAF50" if modo else "#1B5E20"
-        )
-        self.label_titulo.pack(pady=10)
+        ).pack(side="left")
 
         # volver
         self.btn_volver = tk.Button(

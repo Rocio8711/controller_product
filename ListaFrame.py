@@ -36,11 +36,27 @@ class ListaFrame(tk.Frame):
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
         # --- TÍTULO ---
-        tk.Label(
-            self, text="🛒 LISTA DE COMPRA", 
-            font=("Arial", 18, "bold"), bg=bg, fg=verde_fuerte
-        ).pack(pady=(15, 5))
+        # --- CONTENEDOR DEL TÍTULO (Frame para alinear icono y texto) ---
+        header_lista = tk.Frame(self, bg=bg)
+        header_lista.pack(pady=(15, 5))
 
+        # 1. El Icono del Carrito (Color Gris Metálico / Azulado)
+        tk.Label(
+            header_lista, 
+            text="🛒",
+            font=("Segoe UI Emoji", 22), 
+            bg=bg, 
+            fg="#455A64"  # Un gris azulado para el metal del carrito
+        ).pack(side="left", padx=5)
+
+        # 2. El Texto del Título (Verde Fuerte)
+        tk.Label(
+            header_lista, 
+            text="LISTA DE COMPRA",
+            font=("Arial", 18, "bold"),
+            bg=bg, 
+            fg=verde_fuerte
+        ).pack(side="left")
         # --- BOTÓN VOLVER (SITUACIÓN IGUALADA) ---
         # volver
         self.btn_volver = tk.Button(

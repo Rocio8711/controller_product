@@ -55,13 +55,27 @@ class HomeFrame(tk.Frame):
         contenido.place(relx=0.5, rely=0.5, anchor="center")
 
         # 4. Título
+        # --- CONTENEDOR DEL TÍTULO (Para alinear icono y texto) ---
+        header_home = tk.Frame(contenido, bg=bg_color)
+        header_home.grid(row=0, column=0, columnspan=2, pady=(0, 30))
+
+        # 1. El Icono de la Caja (Marrón)
         tk.Label(
-            contenido,
+            header_home, 
+            text="📦",
+            font=("Segoe UI Emoji", 30), # Un poco más grande para que destaque
+            bg=bg_color, 
+            fg="#8B4513"  # Marrón madera/cartón
+        ).pack(side="left", padx=10)
+
+        # 2. El Texto del Título (Verde)
+        tk.Label(
+            header_home, 
             text="CONTROLLER PRODUCT",
             font=("Segoe UI", 26, "bold"),
-            fg="#2E7D32", 
-            bg=bg_color
-        ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
+            bg=bg_color, 
+            fg="#2E7D32"  # Tu verde original
+        ).pack(side="left")
 
         # 5. Imagen de Logo
         self.logo_label = tk.Label(contenido, bg=bg_color)
