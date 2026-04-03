@@ -117,8 +117,7 @@ class InventarioFrame(tk.Frame):
         btn_configs = [
             ("➕ Añadir", "#4CAF50", self.abrir_agregar),
             ("✏️ Modificar", "#FF9800", self.modificar_producto),
-            ("❌ Borrar", "#F44336", self.borrar_producto),
-            ("🔄 Cargar Datos", "#2196F3", self.cargar)
+            ("❌ Borrar", "#F44336", self.borrar_producto)
         ]
 
         for i, (texto, color, comando) in enumerate(btn_configs):
