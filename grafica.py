@@ -38,7 +38,7 @@ class App(tk.Tk):
         self.style.theme_use("clam")
 
         self._set_global_colors()
-        self._configurar_estilos_treeview() 
+    
 
         container = tk.Frame(self, bg=self.bg_app)
         container.pack(fill="both", expand=True)
@@ -52,6 +52,7 @@ class App(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(HomeFrame)
+        self.after(100, self._configurar_estilos_treeview)
 
     # 2. ESTA FUNCIÓN DEBE ESTAR ALINEADA CON EL DEF __INIT__
     def centrar_ventana(self, ancho, alto):
@@ -80,7 +81,7 @@ class App(tk.Tk):
             padding=6,
             relief="flat"
         )
-        self.style.map("Treeview.Heading", background=[("active", "#388E3C")])
+        self.style.map("Treeview.Heading", background=[("active", "#7CA27E" if self.modo_oscuro else "#388E3C")])
 
         self.style.configure("Treeview",
             background=bg_tree,
@@ -90,7 +91,7 @@ class App(tk.Tk):
             font=("Segoe UI", 10)
         )
         self.style.map("Treeview",
-            background=[("selected", "#A5D6A7")],
+            background=[("selected", "#83C285")],
             foreground=[("selected", "black")]
         )
 
