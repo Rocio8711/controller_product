@@ -123,31 +123,31 @@ class RecetasPendientesFrame(tk.Frame):
 
         # Botón Cocinar se activa dependiendo ingredientes
         self.btn_cocinar = tk.Button(
-            btn_frame, 
-            text="✅ Cocinar Ahora", 
-            command=self.ejecutar_cocinado, 
-            bg="#4CAF50", 
-            fg="white", 
-            width=18,                    # <--- Ancho igualado
-            state="disabled", 
+            btn_frame,
+            text="✅ Cocinar Ahora",
+            command=self.ejecutar_cocinado,
+            bg="#4CAF50",
+            fg="white",
+            width=18,
+            state="disabled",
             font=("Arial", 10, "bold"),
-            cursor="hand2", 
-            bd=0, 
-            pady=6                       # <--- Altura igualada
+            cursor="hand2",
+            bd=0,
+            pady=6
         )
         self.btn_cocinar.grid(row=0, column=0, padx=10)
 
         # Botón Eliminar
         tk.Button(
-            btn_frame, 
-            text="🗑️Quitar del Plan", 
-            command=self.eliminar_pendiente, 
-            bg="#F44336", 
-            fg="white", 
-            width=18,                    # <--- Ancho igualado
-            font=("Arial", 10, "bold"),  # <--- Fuente igualada
-            bd=0, 
-            pady=6,                      # <--- Altura igualada
+            btn_frame,
+            text="🗑️Quitar del Plan",
+            command=self.eliminar_pendiente,
+            bg="#F44336",
+            fg="white",
+            width=18,
+            font=("Arial", 10, "bold"),
+            pady=6,
+            bd=0,
             cursor="hand2"
         ).grid(row=0, column=1, padx=10)
 

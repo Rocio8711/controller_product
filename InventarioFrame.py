@@ -55,7 +55,7 @@ class InventarioFrame(tk.Frame):
 
         # 4. Botón Volver
         tk.Button(
-            self, text="⬅ Volver",
+            self, text="⬅ Volver al Inicio",
             font=("Segoe UI", 10, "bold"),
             bg="#444444" if modo else "#E0E0E0",
             fg="white" if modo else "black",
@@ -123,12 +123,15 @@ class InventarioFrame(tk.Frame):
             ("🔄 Cargar Datos", "#2196F3", self.cargar)
         ]
 
-        for texto, color, comando in btn_configs:
+        for i, (texto, color, comando) in enumerate(btn_configs):
             tk.Button(
-                self.frame_acciones, text=texto, command=comando,
-                bg=color, fg="white", font=("Segoe UI", 10, "bold"),
-                bd=0, padx=15, pady=8, cursor="hand2"
-            ).pack(side="left", padx=10)
+                self.frame_acciones,
+                text=texto,
+                command=comando,
+                bg=color,
+                fg="white",
+                bd=0
+            ).grid(row=0, column=i, padx=5)
 
         self.cargar()
 

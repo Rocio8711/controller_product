@@ -84,13 +84,8 @@ class ListaFrame(tk.Frame):
             text="✅ Marcar como Comprado", 
             command=self.marcar, 
             bg="#4CAF50", 
-            fg="white", 
-            font=("Arial", 10, "bold"), # Fuente estándar
-            width=22,                    # Ancho intermedio
-            bd=0, 
-            pady=6,                      # Menos altura (antes era 10)
-            cursor="hand2",
-            activebackground="#45a049"
+            fg="white",
+            bd=0
         ).pack() # Usamos pack para centrarlo al estar solo
 
         # Cargamos los datos al construir la interfaz
