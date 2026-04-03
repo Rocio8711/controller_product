@@ -40,12 +40,12 @@ class LoginApp:
 
         # EMAIL
         tk.Label(self.container, text="Email", bg="#F8F9FA").pack(anchor="w")
-        self.email_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30)
+        self.email_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30, fg="#2E7D32")
         self.email_entry.pack(pady=(5, 15), ipady=5)
 
         # PASSWORD
         tk.Label(self.container, text="Contraseña", bg="#F8F9FA").pack(anchor="w")
-        self.password_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30, show="*")
+        self.password_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30, show="*", fg="#2E7D32")
         self.password_entry.pack(pady=(5, 10), ipady=5)
 
         self.show_pass = tk.BooleanVar()
