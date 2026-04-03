@@ -42,20 +42,12 @@ class RecetasPendientesFrame(tk.Frame):
         ).pack(pady=(10, 5)) # Reducimos un poco el pady inferior
 
         # --- BOTÓN VOLVER (SITUACIÓN SUPERIOR) ---
-        # Lo colocamos justo debajo del título para que coincida con tu imagen
-        tk.Button(
-            self, 
-            text="⬅ Volver", 
-            command=self.ir_a_home, 
-            bg="#555555", 
-            fg="white", 
-            font=("Arial", 10, "bold"), # Fuente más pequeña como en la captura
-            width=12, 
-            bd=0, 
-            pady=5, 
-            cursor="hand2",
-            activebackground="#333333",
-            activeforeground="white"
+
+        self.btn_volver = tk.Button(
+            self, text="⬅ Volver",
+            bg="#444444" if modo else "#E0E0E0",
+            fg="white" if modo else "black",
+            command=self.ir_a_home
         ).pack(pady=5)
 
         # =====================================================

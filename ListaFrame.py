@@ -30,7 +30,7 @@ class ListaFrame(tk.Frame):
         self.toggle_btn = tk.Button(
             self, text="☀️" if modo else "🌙",
             command=self.alternar_modo,
-            font=("Segoe UI Emoji", 14), bd=0, bg=bg, fg=fg,
+            font=("Segoe UIUI Emoji", 14), bd=0, bg=bg, fg=fg,
             activebackground=bg, cursor="hand2"
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
@@ -42,20 +42,13 @@ class ListaFrame(tk.Frame):
         ).pack(pady=(15, 5))
 
         # --- BOTÓN VOLVER (SITUACIÓN IGUALADA) ---
+        # volver
         self.btn_volver = tk.Button(
-            self, text="⬅ Volver", 
-            command=self.ir_a_home,
-            font=("Arial", 10, "bold"),
-            bg="#555555", # Gris coherente
-            fg="white",
-            width=12,     # Tamaño igualado
-            bd=0,
-            pady=5,       # Altura igualada
-            cursor="hand2",
-            activebackground="#333333",
-            activeforeground="white"
-        )
-        self.btn_volver.pack(pady=5)
+            self, text="⬅ Volver",
+            bg="#444444" if modo else "#E0E0E0",
+            fg="white" if modo else "black",
+            command=self.ir_a_home
+        ).pack(pady=5)
 
         # --- TABLA ---
         frame_tabla = tk.Frame(self, bg=bg)

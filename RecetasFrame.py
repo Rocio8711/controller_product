@@ -53,20 +53,11 @@ class RecetasFrame(tk.Frame):
 
         # volver
         self.btn_volver = tk.Button(
-            self,
-            text="⬅ Volver",
-            command=self.ir_a_home,
-            bg="#555555",                 # Gris estándar como en los otros frames
-            fg="white",
-            font=("Arial", 10, "bold"),   # Tamaño de fuente igualado
-            width=12,                     # Ancho igualado
-            bd=0,
-            pady=5,                       # Altura interna igualada
-            cursor="hand2",
-            activebackground="#333333",
-            activeforeground="white"
-        )
-        self.btn_volver.pack(pady=5)
+            self, text="⬅ Volver",
+            bg="#444444" if modo else "#E0E0E0",
+            fg="white" if modo else "black",
+            command=self.ir_a_home
+        ).pack(pady=5)
         
 
         # =========================
