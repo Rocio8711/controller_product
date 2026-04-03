@@ -47,11 +47,24 @@ class InventarioFrame(tk.Frame):
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
         # 3. Título
+        header_frame = tk.Frame(self, bg=bg_main)
+        header_frame.pack(pady=(30, 5))
+
+        # 2. El ícono en MARRÓN
         tk.Label(
-            self, text="📦 INVENTARIO DE PRODUCTOS",
-            font=("Segoe UI", 24, "bold"),
-            bg=bg_main, fg=accent_green
-        ).pack(pady=(30, 5))
+            header_frame, text="📦",
+            font=("Calibri", 24),
+            bg=bg_main, 
+            fg="#8B4513"  # Marrón para la caja
+        ).pack(side="left", padx=5)
+
+        # 3. El texto en tu color original 
+        tk.Label(
+            header_frame, text="Inventario de Productos",
+            font=("Calibri", 22, "bold"),
+            bg=bg_main, 
+            fg=accent_green # O el color que desees para las letras
+        ).pack(side="left")
 
         # 4. Botón Volver
         tk.Button(

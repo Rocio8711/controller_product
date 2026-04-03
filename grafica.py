@@ -26,8 +26,11 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.title("SmartKitchen Inventory")
-        self.geometry("900x700") # Un poco más grande para que luzca el diseño
+
+        self.title("Controller Product")
+        
+        # 1. AQUÍ ACTIVAMOS EL CENTRADO (900x700 es tu tamaño)
+        self.centrar_ventana(900, 700)
 
         self.modo_oscuro = True
 
@@ -35,7 +38,7 @@ class App(tk.Tk):
         self.style.theme_use("clam")
 
         self._set_global_colors()
-        self._configurar_estilos_treeview() # Movido a una función limpia
+        self._configurar_estilos_treeview() 
 
         container = tk.Frame(self, bg=self.bg_app)
         container.pack(fill="both", expand=True)
@@ -43,13 +46,23 @@ class App(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        # Aquí se crean las instancias de las clases importadas
-        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame,RecetasPendientesFrame):
+        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame, RecetasPendientesFrame):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(HomeFrame)
+
+    # 2. ESTA FUNCIÓN DEBE ESTAR ALINEADA CON EL DEF __INIT__
+    def centrar_ventana(self, ancho, alto):
+        """Calcula el centro de la pantalla y posiciona la ventana ahí"""
+        pantalla_ancho = self.winfo_screenwidth()
+        pantalla_alto = self.winfo_screenheight()
+
+        x = (pantalla_ancho // 2) - (ancho // 2)
+        y = (pantalla_alto // 2) - (alto // 2)
+
+        self.geometry(f"{ancho}x{alto}+{x}+{y}")
 
     def _set_global_colors(self):
         self.bg_app = "#121212" if self.modo_oscuro else "#F0F0F0"
