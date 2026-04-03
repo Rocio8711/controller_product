@@ -32,7 +32,7 @@ class App(tk.Tk):
         # 1. AQUÍ ACTIVAMOS EL CENTRADO (900x700 es tu tamaño)
         self.centrar_ventana(900, 700)
 
-        self.modo_oscuro = True
+        self.modo_oscuro = False
 
         self.style = ttk.Style(self)
         self.style.theme_use("clam")

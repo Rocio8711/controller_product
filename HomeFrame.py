@@ -21,6 +21,7 @@ class HomeFrame(tk.Frame):
         """Configura y dibuja todos los widgets de la interfaz"""
         self.modo = self.controller.modo_oscuro
         
+        
         # Definición de colores según el modo
         bg_color = "#000000" if self.modo else "#ffffff"
         fg_color = "white" if self.modo else "black"
@@ -57,7 +58,7 @@ class HomeFrame(tk.Frame):
         tk.Label(
             contenido,
             text="CONTROLLER PRODUCT",
-            font=("Impact", 26, "bold"),
+            font=("Segoe UI", 26, "bold"),
             fg="#2E7D32", 
             bg=bg_color
         ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
