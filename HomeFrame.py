@@ -10,7 +10,7 @@ class HomeFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        
+        self.modo=None
         # Guardaremos una referencia al logo para que el Garbage Collector no la borre
         self.logo_img = None
         
@@ -19,13 +19,13 @@ class HomeFrame(tk.Frame):
 
     def _setup_ui(self):
         """Configura y dibuja todos los widgets de la interfaz"""
-        modo = self.controller.modo_oscuro
+        self.modo = self.controller.modo_oscuro
         
         # Definición de colores según el modo
-        bg_color = "#121212" if modo else "#F0F0F0"
-        fg_color = "white" if modo else "black"
-        btn_bg = "#388E3C" if modo else "#4CAF50"
-        btn_active = "#66BB6A" if modo else "#45a049"
+        bg_color = "#000000" if self.modo else "#ffffff"
+        fg_color = "white" if self.modo else "black"
+        btn_bg = "#388E3C" if self.modo else "#4CAF50"
+        btn_active = "#66BB6A" if self.modo else "#45a049"
 
         # 1. Limpiar el frame antes de redibujar (importante para el toggle)
         for widget in self.winfo_children():
@@ -36,7 +36,7 @@ class HomeFrame(tk.Frame):
         # 2. Botón de Toggle (Modo Oscuro/Claro)
         self.toggle_btn = tk.Button(
             self,
-            text="☀️" if modo else "🌙",
+            text="☀️" if self.modo else "🌙",
             command=self.toggle_modo_oscuro,
             bg=bg_color,
             fg=fg_color,
@@ -57,7 +57,7 @@ class HomeFrame(tk.Frame):
         tk.Label(
             contenido,
             text="CONTROLLER PRODUCT",
-            font=("Arial", 26, "bold"),
+            font=("Impact", 26, "bold"),
             fg="#2E7D32", 
             bg=bg_color
         ).grid(row=0, column=0, columnspan=2, pady=(0, 30))
@@ -119,7 +119,7 @@ class HomeFrame(tk.Frame):
         """Carga la imagen del logo usando ruta robusta"""
         try:
             # Intentamos usar ruta relativa primero por si mueves la carpeta
-            img_name = "logo.jpeg"
+            img_name = "logo_oscuro.jpeg" if self.modo else "logo.jpeg"
             path = os.path.join(os.path.dirname(__file__), img_name)
             
             # Si no existe en la carpeta relativa, usamos la absoluta que tenías

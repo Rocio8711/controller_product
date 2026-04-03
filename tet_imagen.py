@@ -12,7 +12,7 @@ class SplashScreen(tk.Tk):
 
         # Intentar cargar la imagen
         dir_actual = os.path.dirname(os.path.abspath(__file__))
-        ruta = os.path.join(dir_actual, "logo.png")
+        ruta = os.path.join(dir_actual, "logo.jpeg")
         
         print(f"Buscando en: {ruta}")
 

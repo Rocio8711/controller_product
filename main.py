@@ -25,7 +25,7 @@ class SplashScreen(tk.Tk):
         self.geometry(f"{w}x{h}+{x}+{y}")
 
         # Carga de imagen
-        ruta = os.path.join(os.path.dirname(__file__), "logo.png")
+        ruta = os.path.join(os.path.dirname(__file__), "logo.jpeg")
         try:
             # Abrimos y redimensionamos
             img = Image.open(ruta).convert("RGBA")
