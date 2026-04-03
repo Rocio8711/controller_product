@@ -55,13 +55,11 @@ class InventarioFrame(tk.Frame):
 
         # 4. Botón Volver
         tk.Button(
-            self, text="⬅ Volver al Inicio",
-            font=("Segoe UI", 10, "bold"),
+            self, text="⬅ Volver",
             bg="#444444" if modo else "#E0E0E0",
             fg="white" if modo else "black",
-            bd=0, padx=15, pady=5, cursor="hand2",
             command=self.ir_a_home
-        ).pack(pady=10)
+        ).pack(pady=5)
 
         # 5. Estilo de la Tabla (Treeview)
         style = ttk.Style()
@@ -88,7 +86,7 @@ class InventarioFrame(tk.Frame):
 
         # 6. Contenedor de la Tabla
         self.frame_tabla = tk.Frame(self, bg=bg_main)
-        self.frame_tabla.pack(fill="both", expand=True, padx=40, pady=20)
+        self.frame_tabla.pack(fill="both", expand=True, padx=40, pady=5)
 
         columnas = ("ID", "Producto", "Cantidad", "Unidad", "Min")
         self.tree = ttk.Treeview(self.frame_tabla, columns=columnas, show="headings", style="Treeview")
