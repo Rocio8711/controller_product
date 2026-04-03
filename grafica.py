@@ -81,7 +81,7 @@ class App(tk.Tk):
             padding=6,
             relief="flat"
         )
-        self.style.map("Treeview.Heading", background=[("active", "#7CA27E" if self.modo_oscuro else "#388E3C")])
+        self.style.map("Treeview.Heading", background=[("active", "#7CA27E")])
 
         self.style.configure("Treeview",
             background=bg_tree,
