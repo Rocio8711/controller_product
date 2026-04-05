@@ -46,6 +46,17 @@ class InventarioFrame(tk.Frame):
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
+
+        # 🚪 BOTÓN CERRAR SESIÓN (Corregido)
+        self.logout_btn = tk.Button(
+            self, text="🚪",
+            command=self.cerrar_sesion,
+            font=("Segoe UI Emoji", 14), bd=0, 
+            bg=bg_main, fg="#f44336", # <-- Ahora usa bg_main
+            activebackground=bg_main, cursor="hand2"
+        )
+        self.logout_btn.place(relx=0.98, rely=0.08, anchor="ne")
+
         # 3. Título
         header_frame = tk.Frame(self, bg=bg_main)
         header_frame.pack(pady=(30, 5))
@@ -168,6 +179,24 @@ class InventarioFrame(tk.Frame):
             if isinstance(f_lista[2], (float, int)):
                 f_lista[2] = round(float(f_lista[2]), 2)
             self.tree.insert("", "end", values=f_lista)
+
+
+    def cerrar_sesion(self):
+            if messagebox.askyesno("Cerrar Sesión", "¿Seguro que quieres salir?"):
+                # 1. Limpieza de seguridad
+                self.controller.usuario_email = None
+                
+                # 2. Cerramos la ventana de la App
+                self.controller.destroy()
+                
+                # 3. Reiniciamos el Login (Usando tu clase LoginApp)
+                import tkinter as tk
+                from login import LoginApp
+                
+                root_login = tk.Tk()
+                LoginApp(root_login)
+                root_login.mainloop()
+
 
     def abrir_agregar(self):
         ventana = tk.Toplevel(self)

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import os # Añadido para manejar rutas de archivos
+from tkinter import ttk, messagebox
 
 # =========================
 # 🏠 HOME
@@ -49,6 +50,17 @@ class HomeFrame(tk.Frame):
             highlightthickness=0
         )
         self.toggle_btn.place(relx=0.95, rely=0.02, anchor="ne")
+
+
+        # 🚪 BOTÓN CERRAR SESIÓN (Corregido para HomeFrame)
+        self.logout_btn = tk.Button(
+            self, text="🚪",
+            command=self.cerrar_sesion,
+            font=("Segoe UI Emoji", 14), bd=0, 
+            bg=bg_color, fg="#f44336", # 👈 Cambiado bg por bg_color
+            activebackground=bg_color, cursor="hand2"
+        )
+        self.logout_btn.place(relx=0.95, rely=0.08, anchor="ne") # 0.95 para que alinee con el toggle
 
         # 3. Contenedor principal centrado
         contenido = tk.Frame(self, bg=bg_color)
@@ -129,7 +141,25 @@ class HomeFrame(tk.Frame):
             command=lambda: self.controller.show_frame(ListaFrame), 
             **boton_estilo
         ).pack(pady=10)
-        
+
+
+    def cerrar_sesion(self):
+            if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro de que quieres salir?"):
+                # 1. Borramos rastro del usuario en el controlador
+                self.controller.usuario_email = None
+                
+                # 2. Cerramos la ventana actual de la App
+                self.controller.destroy()
+                
+                # 3. Lanzamos de nuevo el LoginApp
+                import tkinter as tk
+                from login import LoginApp # Importamos la clase de tu archivo login.py
+                
+                root_login = tk.Tk()
+                LoginApp(root_login)
+                root_login.mainloop()
+
+
     def _load_logo(self):
         """Carga la imagen del logo usando ruta robusta"""
         try:

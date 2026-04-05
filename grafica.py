@@ -52,10 +52,17 @@ class App(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame, RecetasPendientesFrame):
-            frame = F(container, self)
-            self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+        # Lista de clases que queremos cargar
+        clases_a_cargar = (HomeFrame, InventarioFrame, RecetasFrame, ListaFrame, RecetasPendientesFrame)
+
+        for F in clases_a_cargar:
+            try:
+                print(f"Cargando pantalla: {F.__name__}...") # Esto te ayuda a debuguear
+                frame = F(container, self)
+                self.frames[F] = frame
+                frame.grid(row=0, column=0, sticky="nsew")
+            except Exception as e:
+                print(f"❌ Error al cargar {F.__name__}: {e}")
 
 
 

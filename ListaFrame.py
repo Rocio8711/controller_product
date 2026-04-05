@@ -38,6 +38,17 @@ class ListaFrame(tk.Frame):
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
+
+    # 🚪 BOTÓN CERRAR SESIÓN (Justo debajo del modo oscuro)
+        self.logout_btn = tk.Button(
+            self, text="🚪",
+            command=self.cerrar_sesion,
+            font=("Segoe UI Emoji", 14), bd=0, bg=bg, fg="#f44336", 
+            activebackground=bg, cursor="hand2"
+        )
+        # Usamos rely=0.07 para que quede justo debajo del anterior
+        self.logout_btn.place(relx=0.98, rely=0.07, anchor="ne")
+
         # --- TÍTULO ---
         # --- CONTENEDOR DEL TÍTULO (Frame para alinear icono y texto) ---
         header_lista = tk.Frame(self, bg=bg)
@@ -109,6 +120,7 @@ class ListaFrame(tk.Frame):
             bd=0
         ).pack(pady=5)
 
+    
 
         # Cargamos los datos al construir la interfaz
         self.cargar()
@@ -149,6 +161,25 @@ class ListaFrame(tk.Frame):
             self.cargar()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo marcar: {e}")
+
+
+
+    def cerrar_sesion(self):
+            if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro de que quieres salir?"):
+                # 1. Borramos rastro del usuario en el controlador
+                self.controller.usuario_email = None
+                
+                # 2. Cerramos la ventana actual de la App
+                self.controller.destroy()
+                
+                # 3. Lanzamos de nuevo el LoginApp
+                import tkinter as tk
+                from login import LoginApp # Importamos la clase de tu archivo login.py
+                
+                root_login = tk.Tk()
+                LoginApp(root_login)
+                root_login.mainloop()
+
 
 
     def enviar_email(self):

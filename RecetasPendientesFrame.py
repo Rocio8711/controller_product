@@ -35,6 +35,18 @@ class RecetasPendientesFrame(tk.Frame):
         )
         self.toggle_btn.place(relx=0.98, rely=0.01, anchor="ne")
 
+
+        # 🚪 BOTÓN CERRAR SESIÓN (Corregido)
+        self.logout_btn = tk.Button(
+            self, text="🚪",
+            command=self.cerrar_sesion,
+            font=("Segoe UI Emoji", 14), bd=0, 
+            bg=bg, fg="#f44336", # <-- Cambiado bg_main por bg
+            activebackground=bg, cursor="hand2"
+        )
+        self.logout_btn.place(relx=0.98, rely=0.08, anchor="ne")
+
+
         # --- TÍTULO PRINCIPAL ---
         # --- CONTENEDOR DEL TÍTULO (Planificador) ---
         header_planificador = tk.Frame(self, bg=bg)
@@ -280,7 +292,25 @@ class RecetasPendientesFrame(tk.Frame):
                     self.tree.see(item)
                     self.actualizar_detalle_ingredientes(id_receta_previa)
                     break
+    
+    def cerrar_sesion(self):
+        if messagebox.askyesno("Cerrar Sesión", "¿Seguro que quieres salir?"):
+            # 1. Limpieza de seguridad
+            self.controller.usuario_email = None
+            
+            # 2. Cerramos la ventana de la App
+            self.controller.destroy()
+            
+            # 3. Reiniciamos el Login (Usando tu clase LoginApp)
+            import tkinter as tk
+            from login import LoginApp
+            
+            root_login = tk.Tk()
+            LoginApp(root_login)
+            root_login.mainloop()
 
+
+            
     def ir_a_home(self):
         from HomeFrame import HomeFrame
         self.controller.show_frame(HomeFrame)
