@@ -175,15 +175,16 @@ class LoginApp:
 
             self.mostrar_bienvenida(nombre)
 
-            self.root.after(2000, self.finalizar_login)
+            self.root.after(2000, lambda: self.finalizar_login(email))
 
 
         else:
             self.mostrar_alerta("Error", "Credenciales incorrectas", "error")
 
-    def finalizar_login(self):
+    def finalizar_login(self, email):
         self.root.destroy()
         app = App()
+        app.usuario_email = email
         app.mainloop()
 
     # =====================================================

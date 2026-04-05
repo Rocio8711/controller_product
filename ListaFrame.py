@@ -4,6 +4,9 @@ from tkinter import ttk, messagebox
 # Importamos las funciones de tu lógica
 from lista_compras import ver_tareas_todas, marcar_comprado
 
+
+from mandar_email import enviar_lista_email
+
 class ListaFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -97,6 +100,16 @@ class ListaFrame(tk.Frame):
             bd=0
         ).pack() # Usamos pack para centrarlo al estar solo
 
+        tk.Button(
+            btn_frame,
+            text="📧 Enviar lista por email",
+            command=self.enviar_email,
+            bg="#2196F3",
+            fg="white",
+            bd=0
+        ).pack(pady=5)
+
+
         # Cargamos los datos al construir la interfaz
         self.cargar()
 
@@ -136,3 +149,53 @@ class ListaFrame(tk.Frame):
             self.cargar()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo marcar: {e}")
+
+
+    def enviar_email(self):
+        # 1. 🛡️ ACTIVAMOS MODO ESPERA
+        self.config(cursor="watch") 
+        self.update_idletasks()
+
+        
+        productos = []
+        for item in self.tree.get_children():
+            valores = self.tree.item(item)["values"]
+
+            # Comprobación de seguridad para el índice
+            if len(valores) > 4 and valores[4] == "comprado":
+                continue
+
+            # Formateamos bonito el string para el email
+            productos.append(f"🛒 {valores[1]} - Cantidad: {valores[2]} {valores[3]}")
+
+        if not productos:
+            messagebox.showwarning("Vacío", "No hay productos pendientes para enviar.")
+            return
+
+        # Recuperar credenciales del controlador
+        destinatario = getattr(self.controller, 'usuario_email', None)
+        email_user = getattr(self.controller, 'email_user', None)
+        email_pass = getattr(self.controller, 'email_pass', None)
+
+        if not destinatario or not email_user or not email_pass:
+            messagebox.showerror("Configuración", "Faltan las credenciales de email en el sistema.")
+            return
+
+        try:
+            # Llamada a la función externa que creamos antes
+            from mandar_email import enviar_lista_email # Asegúrate de importar la función
+            
+            ok = enviar_lista_email(
+                destinatario,
+                productos,
+                email_user,
+                email_pass
+            )
+
+            if ok:
+                messagebox.showinfo("Éxito", f"Lista enviada a:\n{destinatario} ✉️")
+            else:
+                messagebox.showerror("Error", "El servidor SMTP rechazó la conexión.\nRevisa tu Contraseña de Aplicación.")
+
+        except Exception as e:
+            messagebox.showerror("Error Crítico", f"Ocurrió un error inesperado:\n{e}")

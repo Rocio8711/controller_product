@@ -19,6 +19,9 @@ from recetas import (
 from inventario import ver_inventario
 from acceso_base_datos import conexion
 
+from config import EMAIL_USER, EMAIL_PASS
+
+
 # =========================
 # 🧠 APP PRINCIPAL
 # =========================
@@ -39,6 +42,9 @@ class App(tk.Tk):
 
         self._set_global_colors()
     
+        # 📧 CONFIG EMAIL GLOBAL
+        self.email_user = EMAIL_USER
+        self.email_pass = EMAIL_PASS
 
         container = tk.Frame(self, bg=self.bg_app)
         container.pack(fill="both", expand=True)
@@ -51,6 +57,9 @@ class App(tk.Tk):
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
+
+
+        self.usuario_email = None
         self.show_frame(HomeFrame)
         self.after(100, self._configurar_estilos_treeview)
 
@@ -119,9 +128,14 @@ class App(tk.Tk):
     def show_frame(self, frame_class):
         frame = self.frames[frame_class]
         frame.tkraise()
-        self.after(50, self._refresh_frame, frame)
+
+        if frame.winfo_exists():
+            self.after(50, lambda: self._refresh_frame(frame))
 
     def _refresh_frame(self, frame):
+        if not frame.winfo_exists():
+            return
+
         if hasattr(frame, "cargar"):
             frame.cargar()
 
