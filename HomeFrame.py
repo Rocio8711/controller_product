@@ -164,7 +164,7 @@ class HomeFrame(tk.Frame):
         """Carga la imagen del logo usando ruta robusta"""
         try:
             # Intentamos usar ruta relativa primero por si mueves la carpeta
-            img_name = "logo_oscuro.jpeg" if self.modo else "logo.jpeg"
+            img_name = ".\imagenes\logo_oscuro.jpeg" if self.modo else ".\imagenes\logo.jpeg"
             path = os.path.join(os.path.dirname(__file__), img_name)
             
             # Si no existe en la carpeta relativa, usamos la absoluta que tenías

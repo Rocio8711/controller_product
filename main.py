@@ -25,7 +25,7 @@ class SplashScreen(tk.Tk):
         self.geometry(f"{w}x{h}+{x}+{y}")
 
         # Carga de imagen
-        ruta = os.path.join(os.path.dirname(__file__), "logo.jpeg")
+        ruta = os.path.join(os.path.dirname(__file__), ".\\imagenes\\logo.jpeg")
         try:
             # Abrimos y redimensionamos
             img = Image.open(ruta).convert("RGBA")
@@ -39,7 +39,7 @@ class SplashScreen(tk.Tk):
             print(f"No se pudo cargar la imagen: {e}")
             tk.Label(
                 self, 
-                text="SmartKitchen\nCargando...", 
+                text="Controller Product \nCargando...", 
                 fg="white", 
                 bg=verde_corporativo, 
                 font=("Arial", 20, "bold")

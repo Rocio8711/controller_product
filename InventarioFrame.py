@@ -122,7 +122,7 @@ class InventarioFrame(tk.Frame):
 
         self.tree.pack(side="left", fill="both", expand=True)
 
-        scroll = ttk.Scrollbar(self.frame_tabla, orient="vertical", command=self.tree.yview)
+        scroll = tk.Scrollbar(self.frame_tabla, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scroll.set)
         scroll.pack(side="right", fill="y")
 
