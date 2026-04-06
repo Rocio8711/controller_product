@@ -29,15 +29,15 @@ class ListaFrame(tk.Frame):
 
         self.configure(bg=bg)
 
-        # 🌙 BOTÓN TOGGLE
+        # 2. Botón de Modo Oscuro
         self.toggle_btn = tk.Button(
             self, text="☀️" if modo else "🌙",
             command=self.alternar_modo,
-            font=("Segoe UIUI Emoji", 14), bd=0, bg=bg, fg=fg,
-            activebackground=bg, cursor="hand2"
+            font=("Segoe UI Emoji", 14), bd=0, cursor="hand2",
+            bg=bg, fg=fg, activebackground=bg,
+            highlightthickness=0
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
-
 
     # 🚪 BOTÓN CERRAR SESIÓN (Justo debajo del modo oscuro)
         self.logout_btn = tk.Button(
