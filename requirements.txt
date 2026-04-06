@@ -1,1 +1,8 @@
-sqlite3
+Pillow
+
+
+#sqlite3
+#tkinter
+#smtplib
+#re
+#os
