@@ -294,7 +294,32 @@ class RecetasPendientesFrame(tk.Frame):
                     self.tree.see(item)
                     self.actualizar_detalle_ingredientes(id_receta_previa)
                     break
-    
+    def actualizar_stock_producto(self, p_id):
+        conn = conexion()
+        cur = conn.cursor()
+        # 1. Sumar lo que piden las recetas ACTIVAS en el planificador para este producto
+        cur.execute("""
+            SELECT SUM(ri.cantidad) 
+            FROM receta_ingredientes ri
+            JOIN recetas_pendientes rp ON ri.receta_id = rp.receta_id
+            WHERE ri.producto_id = ? AND rp.completada = 0
+        """, (p_id,))
+        total_necesario = cur.fetchone()[0] or 0
+
+        # 2. Ver qué tenemos en el almacén
+        cur.execute("SELECT cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (p_id,))
+        stock_actual, stock_min, unidad = cur.fetchone()
+
+        # 3. Calcular: (Lo que pide el plan + lo mínimo que quiero tener) - lo que ya tengo
+        a_comprar = round(max(0, (total_necesario + stock_min) - stock_actual), 2)
+
+        # 4. Limpiar y actualizar la lista de compras
+        cur.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
+        if a_comprar > 0:
+            cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", 
+                        (p_id, a_comprar, unidad))
+        conn.commit()
+        conn.close()
     def cerrar_sesion(self):
         if messagebox.askyesno("Cerrar Sesión", "¿Seguro que quieres salir?"):
             # 1. Limpieza de seguridad

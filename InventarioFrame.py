@@ -250,6 +250,8 @@ class InventarioFrame(tk.Frame):
             return
         item = self.tree.item(seleccion)
         p_id, n_act, c_act, u_act, m_act = item["values"]
+        c_act = float(c_act)
+        m_act = float(m_act)
 
         ventana = tk.Toplevel(self)
         ventana.title("Modificar producto")
@@ -271,16 +273,36 @@ class InventarioFrame(tk.Frame):
                 n_new, c_new = enombre.get(), float(ecantidad.get())
                 u_new, m_new = eunidad.get(), float(eminimo.get())
                 conn = conexion(); cur = conn.cursor()
+                
                 cur.execute("UPDATE productos SET nombre=?, cantidad=?, unidad=?, stock_minimo=? WHERE id=?",
                             (n_new, c_new, u_new, m_new, p_id))
+            
                 
-                if m_new > c_new:
-                    cur.execute("SELECT id FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
-                    res = cur.fetchone(); dif = m_new - c_new
-                    if res: cur.execute("UPDATE lista_compras SET cantidad=? WHERE id=?", (dif, res[0]))
-                    else: cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", (p_id, dif, u_new))
-                else:
-                    cur.execute("DELETE FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
+
+                if c_act != c_new or m_act != m_new:
+                    cur.execute("SELECT receta_ingredientes.cantidad FROM recetas_pendientes inner join receta_ingredientes on recetas_pendientes.receta_id=receta_ingredientes.receta_id where receta_ingredientes.producto_id=? and recetas_pendientes.completada=0",(p_id,))
+                    resultado=cur.fetchall()
+                    cantidad=0
+                    for res in resultado:
+                        num=float(res[0])
+                        cantidad+=num
+
+                    if c_new - cantidad < m_new:
+                        cantidad_teorica=c_new-cantidad
+                        comprar=m_new-cantidad_teorica
+                        cur.execute("SELECT id FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
+                        res=cur.fetchone()
+                        if res: cur.execute("UPDATE lista_compras SET cantidad=? WHERE id=?", (comprar, res[0]))
+                        else: cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", (p_id, comprar, u_new))
+                    
+                    else:
+                        cur.execute("SELECT id FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
+                        res=cur.fetchone()
+                        if res: 
+                            cur.execute("DELETE FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
+
+
+
 
                 conn.commit(); conn.close()
                 ventana.destroy(); self.cargar()

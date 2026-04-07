@@ -2,8 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from acceso_base_datos import conexion
-from recetas import obtener_recetas, generar_lista_desde_receta
-
+from recetas import obtener_recetas, generar_lista_desde_receta,recalcular_necesidad_producto
 
 class RecetasFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -324,6 +323,7 @@ class RecetasFrame(tk.Frame):
                 cur.execute("UPDATE recetas SET nombre=? WHERE id=?", (nuevo_nombre, rid))
                 conn.commit()
                 conn.close()
+                recalcular_necesidad_producto(pid)
                 win.destroy()
                 self.cargar()
 
@@ -538,6 +538,7 @@ class RecetasFrame(tk.Frame):
 
                     conn.commit()
                     conn.close()
+                    recalcular_necesidad_producto(producto_id)
                     win.destroy()
                     self.cargar_ingredientes(rid) # Refrescamos la tabla de abajo
                     
@@ -658,7 +659,7 @@ class RecetasFrame(tk.Frame):
         """, (rid, pid))
         conn.commit()
         conn.close()
-
+        recalcular_necesidad_producto(pid)
         self.cargar_ingredientes(rid)
 
 
