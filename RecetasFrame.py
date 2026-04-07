@@ -598,6 +598,7 @@ class RecetasFrame(tk.Frame):
         tk.Label(win, text="Nueva Unidad:", bg=bg, fg=fg).pack(pady=(5, 0))
         e2 = tk.Entry(win, bg=entry_bg, fg=fg, insertbackground=fg)
         e2.insert(0, unid_actual)
+        e2.config(state='readonly')
         e2.pack(pady=5, padx=20)
 
         def guardar():
@@ -630,12 +631,21 @@ class RecetasFrame(tk.Frame):
             bg="#FF9800", fg="white", bd=0, padx=15, pady=7, cursor="hand2"
         ).pack(pady=20)
 
+
     def borrar_ingrediente(self):
         sel_r = self.tree.selection()
         sel_i = self.tree_ing.selection()
 
         if not sel_r or not sel_i:
             return
+
+        # Obtenemos el nombre del ingrediente para el mensaje (está en la columna 0 de la tabla de ingredientes)
+        nombre_ing = self.tree_ing.item(sel_i[0])["values"][0]
+
+        # Ventana de confirmación de seguridad
+        from tkinter import messagebox
+        if not messagebox.askyesno("Confirmar borrado", f"¿Estás seguro de que deseas eliminar '{nombre_ing}' de esta receta?"):
+            return  # Si el usuario dice "No", salimos del método sin hacer nada
 
         rid = self.tree.item(sel_r[0])["values"][0]
         pid = self.tree_ing.item(sel_i[0])["tags"][0]

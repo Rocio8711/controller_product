@@ -98,27 +98,27 @@ class ListaFrame(tk.Frame):
         scrollbar.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # --- BOTONES DE ACCIÓN (Solo "Comprado") ---
+        # --- BOTONES DE ACCIÓN (Alineados y con estilo) ---
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=20)
 
+        # Botón Marcar como Comprado
         tk.Button(
             btn_frame, 
             text="✅ Marcar como Comprado", 
             command=self.marcar, 
             bg="#4CAF50", 
             fg="white",
-            bd=0
-        ).pack() # Usamos pack para centrarlo al estar solo
+        ).pack(side="left", padx=10)     # side="left" los pone uno al lado del otro
 
+        # Botón Enviar lista por email
         tk.Button(
             btn_frame,
             text="📧 Enviar lista por email",
             command=self.enviar_email,
             bg="#2196F3",
             fg="white",
-            bd=0
-        ).pack(pady=5)
+        ).pack(side="left", padx=10)     # padx=10 crea la separación entre ellos
 
     
 
