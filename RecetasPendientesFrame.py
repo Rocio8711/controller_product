@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 
 class RecetasPendientesFrame(tk.Frame):
     def __init__(self, parent, controller):

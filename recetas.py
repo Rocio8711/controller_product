@@ -1,4 +1,4 @@
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 from inventario import verificar_stock_minimo
 from lista_compras import marcar_comprado
 

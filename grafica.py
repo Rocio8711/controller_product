@@ -17,7 +17,7 @@ from recetas import (
     preparar_receta
 )
 from inventario import ver_inventario
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 
 from config import EMAIL_USER, EMAIL_PASS
 

@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     # PASO B: Base de Datos
     try:
-        from acceso_base_datos import crear_tablas
+        from InicializacionBaseDatos.acceso_base_datos import crear_tablas
         crear_tablas()
     except Exception as e:
         print(f"Error BD: {e}")

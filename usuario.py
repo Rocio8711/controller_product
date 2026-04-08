@@ -1,5 +1,5 @@
 import sqlite3
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 
 
 def login(email, contrasena):

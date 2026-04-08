@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 import sqlite3
 
 # Importamos tus módulos de lógica
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 from inventario import ver_inventario
 
 # ==========================================

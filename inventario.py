@@ -1,4 +1,4 @@
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 
 
 # =========================

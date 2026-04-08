@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from acceso_base_datos import conexion
+from InicializacionBaseDatos.acceso_base_datos import conexion
 from recetas import obtener_recetas, generar_lista_desde_receta,recalcular_necesidad_producto
 
 class RecetasFrame(tk.Frame):
