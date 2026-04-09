@@ -2,6 +2,10 @@
  [('HomeFrame',
    'C:\\Users\\sienr\\Documents\\Proyecto_ControllerProduct\\HomeFrame.py',
    'PYMODULE'),
+  ('InicializacionBaseDatos', '-', 'PYMODULE'),
+  ('InicializacionBaseDatos.acceso_base_datos',
+   'C:\\Users\\sienr\\Documents\\Proyecto_ControllerProduct\\InicializacionBaseDatos\\acceso_base_datos.py',
+   'PYMODULE'),
   ('InventarioFrame',
    'C:\\Users\\sienr\\Documents\\Proyecto_ControllerProduct\\InventarioFrame.py',
    'PYMODULE'),
@@ -277,9 +281,6 @@
   ('_threading_local',
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\\Lib\\_threading_local.py',
-   'PYMODULE'),
-  ('acceso_base_datos',
-   'C:\\Users\\sienr\\Documents\\Proyecto_ControllerProduct\\acceso_base_datos.py',
    'PYMODULE'),
   ('argparse',
    'C:\\Program '

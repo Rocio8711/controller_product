@@ -18,13 +18,13 @@
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/main.py" type="text/plain"><tt>main.py</tt></a>
 <span class="moduletype">Script</span>  <div class="import">
 imports:
-    <a href="#PIL">PIL</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
+ &#8226;   <a href="#PIL">PIL</a>
  &#8226;   <a href="#PIL.Image">PIL.Image</a>
  &#8226;   <a href="#PIL.ImageTk">PIL.ImageTk</a>
  &#8226;   <a href="#_collections_abc">_collections_abc</a>
  &#8226;   <a href="#_weakrefset">_weakrefset</a>
  &#8226;   <a href="#abc">abc</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
  &#8226;   <a href="#codecs">codecs</a>
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#collections.abc">collections.abc</a>
@@ -336,12 +336,48 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="InicializacionBaseDatos"></a>
+  <a target="code" href="-" type="text/plain"><tt>InicializacionBaseDatos</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imported by:
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="InicializacionBaseDatos.acceso_base_datos"></a>
+  <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/InicializacionBaseDatos/acceso_base_datos.py" type="text/plain"><tt>InicializacionBaseDatos.acceso_base_datos</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#InicializacionBaseDatos">InicializacionBaseDatos</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#InventarioFrame">InventarioFrame</a>
+ &#8226;   <a href="#RecetasFrame">RecetasFrame</a>
+ &#8226;   <a href="#RecetasPendientesFrame">RecetasPendientesFrame</a>
+ &#8226;   <a href="#grafica">grafica</a>
+ &#8226;   <a href="#inventario">inventario</a>
+ &#8226;   <a href="#lista_compras">lista_compras</a>
+ &#8226;   <a href="#main.py">main.py</a>
+ &#8226;   <a href="#recetas">recetas</a>
+ &#8226;   <a href="#usuario">usuario</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="InventarioFrame"></a>
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/InventarioFrame.py" type="text/plain"><tt>InventarioFrame</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#HomeFrame">HomeFrame</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
+ &#8226;   <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#inventario">inventario</a>
  &#8226;   <a href="#login">login</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
@@ -2673,7 +2709,7 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#HomeFrame">HomeFrame</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
+ &#8226;   <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#login">login</a>
  &#8226;   <a href="#recetas">recetas</a>
  &#8226;   <a href="#tkinter">tkinter</a>
@@ -2696,7 +2732,7 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#HomeFrame">HomeFrame</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
+ &#8226;   <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#login">login</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
@@ -3853,30 +3889,6 @@ imported by:
  &#8226;   <a href="#threadpoolctl">threadpoolctl</a>
  &#8226;   <a href="#typing">typing</a>
  &#8226;   <a href="#typing_extensions">typing_extensions</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="acceso_base_datos"></a>
-  <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/acceso_base_datos.py" type="text/plain"><tt>acceso_base_datos</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#sqlite3">sqlite3</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#InventarioFrame">InventarioFrame</a>
- &#8226;   <a href="#RecetasFrame">RecetasFrame</a>
- &#8226;   <a href="#RecetasPendientesFrame">RecetasPendientesFrame</a>
- &#8226;   <a href="#grafica">grafica</a>
- &#8226;   <a href="#inventario">inventario</a>
- &#8226;   <a href="#lista_compras">lista_compras</a>
- &#8226;   <a href="#main.py">main.py</a>
- &#8226;   <a href="#recetas">recetas</a>
- &#8226;   <a href="#usuario">usuario</a>
 
   </div>
 
@@ -9811,6 +9823,7 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#HomeFrame">HomeFrame</a>
+ &#8226;   <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#InventarioFrame">InventarioFrame</a>
  &#8226;   <a href="#ListaFrame">ListaFrame</a>
  &#8226;   <a href="#PIL">PIL</a>
@@ -9818,7 +9831,6 @@ imports:
  &#8226;   <a href="#PIL.ImageTk">PIL.ImageTk</a>
  &#8226;   <a href="#RecetasFrame">RecetasFrame</a>
  &#8226;   <a href="#RecetasPendientesFrame">RecetasPendientesFrame</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
  &#8226;   <a href="#config">config</a>
  &#8226;   <a href="#inventario">inventario</a>
  &#8226;   <a href="#lista_compras">lista_compras</a>
@@ -10686,7 +10698,7 @@ imported by:
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/inventario.py" type="text/plain"><tt>inventario</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#acceso_base_datos">acceso_base_datos</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
 
   </div>
   <div class="import">
@@ -11009,7 +11021,7 @@ imported by:
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/lista_compras.py" type="text/plain"><tt>lista_compras</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#acceso_base_datos">acceso_base_datos</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
 
   </div>
   <div class="import">
@@ -19831,7 +19843,7 @@ imported by:
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/recetas.py" type="text/plain"><tt>recetas</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#acceso_base_datos">acceso_base_datos</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#inventario">inventario</a>
  &#8226;   <a href="#lista_compras">lista_compras</a>
 
@@ -20168,8 +20180,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#InventarioFrame">InventarioFrame</a>
- &#8226;   <a href="#acceso_base_datos">acceso_base_datos</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
+ &#8226;   <a href="#InventarioFrame">InventarioFrame</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
  &#8226;   <a href="#sqlite3.__main__">sqlite3.__main__</a>
  &#8226;   <a href="#sqlite3.dbapi2">sqlite3.dbapi2</a>
@@ -21908,7 +21920,7 @@ imported by:
   <a target="code" href="///C:/Users/sienr/Documents/Proyecto_ControllerProduct/usuario.py" type="text/plain"><tt>usuario</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#acceso_base_datos">acceso_base_datos</a>
+    <a href="#InicializacionBaseDatos.acceso_base_datos">InicializacionBaseDatos.acceso_base_datos</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
 
   </div>
