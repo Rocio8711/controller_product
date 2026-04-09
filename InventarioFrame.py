@@ -219,9 +219,14 @@ class InventarioFrame(tk.Frame):
             try:
                 n, c, u, m = nombre.get(), cantidad.get(), unidad.get(), minimo.get()
                 if not n or not c: raise ValueError("Nombre y Cantidad obligatorios")
+
                 conn = conexion(); cur = conn.cursor()
-                cur.execute("INSERT INTO productos (nombre, cantidad, unidad, stock_minimo) VALUES (?,?,?,?)",
-                            (n, float(c), u, float(m) if m else 0))
+                cur.execute("INSERT INTO productos (nombre, cantidad, unidad, stock_minimo) VALUES (?,?,?,?)",(n, float(c), u, float(m) if m else 0))
+                nuevo_id = cur.lastrowid
+                if float(c) < float(m) :
+                    cantidad_comprar=float(m) - float(c) 
+                    cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)VALUES (?, ?, ?, 0)", (nuevo_id, cantidad_comprar, u))
+
                 conn.commit(); conn.close()
                 ventana.destroy()
                 self.cargar()

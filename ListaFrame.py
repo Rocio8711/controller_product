@@ -230,3 +230,7 @@ class ListaFrame(tk.Frame):
 
         except Exception as e:
             messagebox.showerror("Error Crítico", f"Ocurrió un error inesperado:\n{e}")
+
+        finally:
+            # 2. 🛡️ RESTABLECEMOS EL CURSOR (Ocurra un error o no)
+            self.config(cursor="")
