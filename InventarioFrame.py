@@ -306,9 +306,6 @@ class InventarioFrame(tk.Frame):
                         if res: 
                             cur.execute("DELETE FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
 
-
-
-
                 conn.commit(); conn.close()
                 ventana.destroy(); self.cargar()
             except Exception as e:
