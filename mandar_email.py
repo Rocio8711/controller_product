@@ -9,12 +9,14 @@ from email.header import Header
 import smtplib
 
 def enviar_lista_email(destinatario, productos, usuario_email, password):
+    #preparamos el contenedor del mensaje indicando que vamos a enviar una versión visual en html
     mensaje = MIMEMultipart("alternative") # "alternative" permite enviar texto y HTML
     mensaje["From"] = usuario_email
     mensaje["To"] = destinatario
+    #usamos header para que los caracteres especiales como la ñ o los emojis se vean bien en el asunto
     mensaje["Subject"] = Header("🛒 Tu Lista de la Compra", "utf-8")
 
-    # 1. Generamos las filas de la tabla dinámicamente
+    #recorremos la lista de productos y vamos montando las filas de la tabla una por una en formato html
     filas_html = ""
     for p in productos:
         filas_html += f"""
@@ -23,7 +25,7 @@ def enviar_lista_email(destinatario, productos, usuario_email, password):
         </tr>
         """
 
-    # 2. Creamos un diseño HTML con CSS integrado
+    #escribimos toda la estructura del correo con estilos css para que se vea modernillo
     html = f"""
     <html>
     <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px;">
@@ -53,21 +55,25 @@ def enviar_lista_email(destinatario, productos, usuario_email, password):
     """
 
 
-    # Añadimos la versión HTML al mensaje
+    #convertimos el texto html que hemos fabricado en una pieza del mensaje con codificación utf-8
     parte_html = MIMEText(html, "html", "utf-8")
     mensaje.attach(parte_html)
 
     server = None
     try:
+        #nos conectamos al servidor de gmail usando el puerto de seguridad y activamos el cifrado tls
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
+        #entramos con nuestra cuenta, enviamos el correo convertido a cadena de texto y avisamos de que todo ha ido bien
         server.login(usuario_email, password)
         server.sendmail(usuario_email, destinatario, mensaje.as_string())
         return True
     except Exception as e:
+        #si algo falla durante la conexion o el envio mostramos el error por pantalla y devolvemos falso
         print(f"Error al enviar: {e}")
         return False
     finally:
+        #cerramos la conexion con el servidor siempre, tanto si el envio ha funcionado como si no
         if server:
             try:
                 server.quit()
