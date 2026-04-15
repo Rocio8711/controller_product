@@ -22,6 +22,10 @@ class RecetasFrame(tk.Frame):
     # UI
     # =====================================================
     def setup_ui(self):
+        # 1. LIMPIEZA CRÍTICA:por que sino aparece recetario dos veces
+        for widget in self.winfo_children():
+            widget.destroy()
+
         modo = self.controller.modo_oscuro
         bg = "#121212" if modo else "#F0F0F0"
         fg = "white" if modo else "black"
