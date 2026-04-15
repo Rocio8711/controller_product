@@ -327,7 +327,7 @@ class RecetasFrame(tk.Frame):
                 cur.execute("UPDATE recetas SET nombre=? WHERE id=?", (nuevo_nombre, rid))
                 conn.commit()
                 conn.close()
-                recalcular_necesidad_producto(pid)
+                recalcular_necesidad_producto(rid)
                 win.destroy()
                 self.cargar()
 
