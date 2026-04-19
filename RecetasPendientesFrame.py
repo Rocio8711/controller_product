@@ -11,11 +11,10 @@ class RecetasPendientesFrame(tk.Frame):
         self.setup_ui()
 
     def setup_ui(self):
-        # 1. Limpiar la pantalla para el refresco (Modo Oscuro/Claro)
+        #eliminamos todos los widgets para poder reconstruir la interfaz (modo oscuro/claro)
         for widget in self.winfo_children():
             widget.destroy()
 
-        # 2. Configuración de colores según el modo
         modo = self.controller.modo_oscuro
         bg = "#121212" if modo else "#F0F0F0"
         fg = "white" if modo else "black"
@@ -27,7 +26,7 @@ class RecetasPendientesFrame(tk.Frame):
         
         self.configure(bg=bg)
 
-        # 2. Botón de Modo Oscuro
+        # Botón de Modo Oscuro
         self.toggle_btn = tk.Button(
             self, text="☀️" if modo else "🌙",
             command=self.alternar_modo,
@@ -38,7 +37,7 @@ class RecetasPendientesFrame(tk.Frame):
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
 
-        # 🚪 BOTÓN CERRAR SESIÓN (Corregido)
+        # boton cerrar sesion
         self.logout_btn = tk.Button(
             self, text="🚪",
             command=self.cerrar_sesion,
@@ -49,21 +48,20 @@ class RecetasPendientesFrame(tk.Frame):
         self.logout_btn.place(relx=0.98, rely=0.08, anchor="ne")
 
 
-        # --- TÍTULO PRINCIPAL ---
-        # --- CONTENEDOR DEL TÍTULO (Planificador) ---
+        # TÍTULO PRINCIPAL
         header_planificador = tk.Frame(self, bg=bg)
         header_planificador.pack(pady=(10, 5))
 
-        # 1. El Icono del Calendario (Rojo "Calendario")
+        #icono de calendario
         tk.Label(
             header_planificador, 
             text="📅",
             font=("Segoe UI Emoji", 22), 
             bg=bg, 
-            fg="#C62828"  # Rojo vibrante para resaltar fechas
+            fg="#C62828"
         ).pack(side="left", padx=5)
 
-        # 2. El Texto del Título (Verde Fuerte)
+        #texto del título
         tk.Label(
             header_planificador, 
             text="PLANIFICADOR DE COCINA",
@@ -72,8 +70,7 @@ class RecetasPendientesFrame(tk.Frame):
             fg=verde_fuerte
         ).pack(side="left")
 
-        # --- BOTÓN VOLVER (SITUACIÓN SUPERIOR) ---
-
+        # boton vovler
         self.btn_volver = tk.Button(
             self, text="⬅ Volver",
             bg="#444444" if modo else "#E0E0E0",
@@ -81,25 +78,26 @@ class RecetasPendientesFrame(tk.Frame):
             command=self.ir_a_home
         ).pack(pady=5)
 
-        # =====================================================
         # PANEL SUPERIOR: TABLA DE RECETAS PLANIFICADAS
-        # =====================================================
         frame_superior = tk.LabelFrame(
             self, text=" Recetas Planificadas ", 
             bg=bg, fg=fg, font=("Arial", 10, "bold")
         )
         frame_superior.pack(fill="both", expand=True, padx=20, pady=5)
 
+        #definimos columnas
         columnas = ("ID", "Receta", "Fecha", "Estado", "RID")
         self.tree = ttk.Treeview(frame_superior, columns=columnas, show="headings", height=5)
         
+        #configuramos encabezados y tamaños
         for col in columnas:
             self.tree.heading(col, text=col)
             # Ajustamos anchos: Receta más ancho, RID oculto
             ancho = 150 if col == "Receta" else 100
             self.tree.column(col, anchor="center", width=ancho)
         
-        self.tree.column("RID", width=0, stretch=tk.NO) # Columna técnica oculta
+        #ocultamos columna técnica RID
+        self.tree.column("RID", width=0, stretch=tk.NO)
 
         self.tree.pack(side="left", fill="both", expand=True, padx=5, pady=5)
         
@@ -108,18 +106,18 @@ class RecetasPendientesFrame(tk.Frame):
         scroll_sup.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scroll_sup.set)
 
-        # Evento de selección: Carga los ingredientes abajo al hacer clic
+        #cargamos los ingredientes abajo al hacer clic
         self.tree.bind("<<TreeviewSelect>>", self.on_receta_select)
 
-        # =====================================================
+
         # PANEL INFERIOR: DETALLE DE INGREDIENTES Y STOCK
-        # =====================================================
         frame_inferior = tk.LabelFrame(
             self, text=" Verificación de Ingredientes ", 
             bg=bg, fg=fg, font=("Arial", 10, "bold")
         )
         frame_inferior.pack(fill="both", expand=True, padx=20, pady=5)
 
+        #definimos columnas
         cols_ing = ("Producto", "Necesario", "En Stock", "Estado")
         self.tree_ing = ttk.Treeview(frame_inferior, columns=cols_ing, show="headings", height=6)
         
@@ -127,7 +125,7 @@ class RecetasPendientesFrame(tk.Frame):
             self.tree_ing.heading(col, text=col)
             self.tree_ing.column(col, anchor="center", width=110)
 
-        # Configuración de colores de las filas (Tags)
+        #configuramos colores según estado
         self.tree_ing.tag_configure("faltante", foreground=color_error)
         self.tree_ing.tag_configure("ok", foreground=color_ok)
 
@@ -138,13 +136,8 @@ class RecetasPendientesFrame(tk.Frame):
         scroll_inf.pack(side="right", fill="y")
         self.tree_ing.configure(yscrollcommand=scroll_inf.set)
 
-        # =====================================================
-        # BOTONERA FINAL
-        # =====================================================
 
-        # =====================================================
-        # BOTONERA FINAL (USANDO PACK PARA IGUALAR TAMAÑOS)
-        # =====================================================
+        # BOTONES FINAL
         # Creamos un frame para contener los dos botones alineados
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=10)
@@ -152,18 +145,17 @@ class RecetasPendientesFrame(tk.Frame):
         # Botón Cocinar
         self.btn_cocinar = tk.Button(
             btn_frame, 
-            text="Cocinar Ahora", # Quitamos el emoji para que no estire la altura
+            text="Cocinar Ahora", 
             command=self.ejecutar_cocinado, 
             bg="#333333", 
             fg="white", 
             state="disabled",
             width=15
         )
-        self.btn_cocinar.pack(side="left", padx=10)
-        # Usamos side="left" para que se pongan uno al lado del otro
+        self.btn_cocinar.pack(side="left", padx=10)  # Usamos side="left" para que se pongan uno al lado del otro
 
 
-        # Botón Eliminar
+        # Botón Eliminar plan
         tk.Button(
             btn_frame, 
             text="🗑️Quitar del Plan", 
@@ -174,13 +166,11 @@ class RecetasPendientesFrame(tk.Frame):
         ).pack(side="left", padx=5)
 
         
-        # Cargar los datos iniciales de la base de datos
+        # Cargar los datos
         self.cargar()
 
-    # --- LÓGICA ---
 
     def on_receta_select(self, event):
-        """Se activa al hacer clic en una receta de la tabla superior"""
         seleccion = self.tree.selection()
         if not seleccion:
             return
@@ -190,6 +180,7 @@ class RecetasPendientesFrame(tk.Frame):
         self.actualizar_detalle_ingredientes(receta_id)
 
     def actualizar_detalle_ingredientes(self, receta_id):
+        #limpiamos la tabla inferior
         self.tree_ing.delete(*self.tree_ing.get_children())
         
         conn = conexion()
@@ -208,16 +199,17 @@ class RecetasPendientesFrame(tk.Frame):
             estado = "LISTO"
             tag = "ok"
             
+            #comprobamos si falta stock
             if stock < nec:
                 estado = "FALTA"
                 tag = "faltante"
                 puedo_cocinar = False
-            
+            #insertamos datos en la tabla
             self.tree_ing.insert("", "end", values=(nombre, f"{nec} {uni}", f"{stock} {uni}", estado), tags=(tag,))
         
         conn.close()
         
-        # Habilitar el botón solo si hay stock de TODO
+        #activamos o desactivamos el botón cocinar
         if puedo_cocinar:
             self.btn_cocinar.config(state="normal", bg="#4CAF50")
         else:
@@ -235,21 +227,22 @@ class RecetasPendientesFrame(tk.Frame):
             conn = conexion()
             cur = conn.cursor()
             try:
-                # 1. Obtener ingredientes
+                #obtenemos ingredientes
                 cur.execute("SELECT producto_id, cantidad FROM receta_ingredientes WHERE receta_id=?", (receta_id,))
                 ingredientes = cur.fetchall()
 
-                # 2. Descontar stock
+                #descontamos stock de cada producto
                 for p_id, cant in ingredientes:
                     cur.execute("UPDATE productos SET cantidad = cantidad - ? WHERE id = ?", (cant, p_id))
 
-                # 3. Marcar como completada
+                #marcamos la receta como completada
                 cur.execute("UPDATE recetas_pendientes SET completada = 1 WHERE id = ?", (item_plan_id,))
                 
                 conn.commit()
                 messagebox.showinfo("Éxito", "¡Buen provecho! Stock actualizado.")
                 self.cargar() # Recargar todo
             except Exception as e:
+                #si falla, revertimos cambios
                 conn.rollback()
                 messagebox.showerror("Error", f"Fallo al actualizar stock: {e}")
             finally:
@@ -260,6 +253,7 @@ class RecetasPendientesFrame(tk.Frame):
         self.tree_ing.delete(*self.tree_ing.get_children())
         self.btn_cocinar.config(state="disabled")
         
+        #cargamos recetas pendientes
         conn = conexion()
         cur = conn.cursor()
         cur.execute("""
@@ -276,17 +270,17 @@ class RecetasPendientesFrame(tk.Frame):
         conn.close()
 
     def alternar_modo(self):
-        # 1. Intentar obtener la receta seleccionada antes de destruir los widgets
+        #Guardamos la selección actual antes de reconstruir la interfaz
         seleccion = self.tree.selection()
         id_receta_previa = None
         if seleccion:
             id_receta_previa = self.tree.item(seleccion[0])["values"][4] # El RID
 
-        # 2. Cambiar modo y reconstruir UI
+        #Cambiamos el modo global (oscuro/claro) y reconstruimos la UI
         self.controller.toggle_modo_oscuro()
         self.setup_ui()
 
-        # 3. Si había algo seleccionado, intentar restaurar la selección y los ingredientes
+        # si había algo seleccionado, intentar restaurar la selección y los ingredientes
         if id_receta_previa:
             for item in self.tree.get_children():
                 if self.tree.item(item)["values"][4] == id_receta_previa:
@@ -294,10 +288,12 @@ class RecetasPendientesFrame(tk.Frame):
                     self.tree.see(item)
                     self.actualizar_detalle_ingredientes(id_receta_previa)
                     break
+
+
     def actualizar_stock_producto(self, p_id):
         conn = conexion()
         cur = conn.cursor()
-        # 1. Sumar lo que piden las recetas ACTIVAS en el planificador para este producto
+        # sumamos lo que piden las recetas ACTIVAS en el planificador para este producto
         cur.execute("""
             SELECT SUM(ri.cantidad) 
             FROM receta_ingredientes ri
@@ -306,29 +302,33 @@ class RecetasPendientesFrame(tk.Frame):
         """, (p_id,))
         total_necesario = cur.fetchone()[0] or 0
 
-        # 2. Ver qué tenemos en el almacén
+        # vemos qué tenemos en el almacén
         cur.execute("SELECT cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (p_id,))
         stock_actual, stock_min, unidad = cur.fetchone()
 
-        # 3. Calcular: (Lo que pide el plan + lo mínimo que quiero tener) - lo que ya tengo
+        # calculamos (Lo que pide el plan + lo mínimo que quiero tener) - lo que ya tengo
         a_comprar = round(max(0, (total_necesario + stock_min) - stock_actual), 2)
 
-        # 4. Limpiar y actualizar la lista de compras
+        # limpiamos y actualizamos la lista de compras
         cur.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
+        
+        #insertamos solo si realmente hace falta comprar
         if a_comprar > 0:
             cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", 
                         (p_id, a_comprar, unidad))
         conn.commit()
         conn.close()
+
+
     def cerrar_sesion(self):
         if messagebox.askyesno("Cerrar Sesión", "¿Seguro que quieres salir?"):
-            # 1. Limpieza de seguridad
+            #Limpieza de seguridad
             self.controller.usuario_email = None
             
-            # 2. Cerramos la ventana de la App
+            #Cerramos la ventana de la App
             self.controller.destroy()
             
-            # 3. Reiniciamos el Login (Usando tu clase LoginApp)
+            #Reiniciamos el Login (Usando tu clase LoginApp)
             import tkinter as tk
             from login import LoginApp
             
@@ -346,7 +346,7 @@ class RecetasPendientesFrame(tk.Frame):
         seleccion = self.tree.selection()
         if not seleccion: return
         
-        # 1. Obtener IDs
+        #Obtener IDs
         item_plan_id = self.tree.item(seleccion[0])["values"][0]
         receta_id_a_borrar = self.tree.item(seleccion[0])["values"][4]
 
@@ -356,17 +356,17 @@ class RecetasPendientesFrame(tk.Frame):
                 conn = conexion()
                 cur = conn.cursor()
 
-                # A. Obtener productos que usa la receta que vamos a quitar
+                #obtenemos los productos que usa la receta que vamos a quitar
                 cur.execute("SELECT producto_id FROM receta_ingredientes WHERE receta_id = ?", (receta_id_a_borrar,))
                 productos_afectados = [p[0] for p in cur.fetchall()]
 
-                # B. BORRAR LA RECETA PRIMERO
+                # borramos la receta dl planificador
                 cur.execute("DELETE FROM recetas_pendientes WHERE id = ?", (item_plan_id,))
                 print(f"DEBUG: Receta {receta_id_a_borrar} eliminada del plan.")
 
-                # C. RECALCULAR CADA PRODUCTO AFECTADO
+                #recalculamos cada producto afectado
                 for p_id in productos_afectados:
-                    # Sumar lo que piden las recetas que QUEDAN en el planificador
+                    # Sumamos lo que piden las recetas que QUEDAN en el planificador
                     cur.execute("""
                         SELECT SUM(ri.cantidad) 
                         FROM receta_ingredientes ri
@@ -376,19 +376,19 @@ class RecetasPendientesFrame(tk.Frame):
                     res_sum = cur.fetchone()[0]
                     total_recetas_restantes = res_sum if res_sum is not None else 0
 
-                    # Obtener stock actual y mínimo
+                    # Obtenemos lso datos el producto
                     cur.execute("SELECT nombre, cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (p_id,))
                     nombre_p, stock_actual, stock_min, unidad_p = cur.fetchone()
 
-                    # CÁLCULO: (Lo que piden las recetas + El mínimo) - Lo que ya tengo
+                    # calculamos (Lo que piden las recetas + El mínimo) - Lo que ya tengo
                     # Ejemplo Pollo: (5 de Receta B + 5 Mínimo) - 2 en Stock = 8 a comprar.
                     necesidad_total = total_recetas_restantes + stock_min
                     cantidad_comprar = round(max(0, necesidad_total - stock_actual), 2)
                     
                     print(f"DEBUG: Producto: {nombre_p} | Necesidad Total: {necesidad_total} | Stock: {stock_actual} | Comprar: {cantidad_comprar}")
 
-                    # D. ACTUALIZAR LISTA DE COMPRAS
-                    # Primero borramos cualquier rastro previo de este producto "no comprado"
+                    #actualizamos lista de comprasS
+                    #primero borramos cualquier rastro previo de este producto "no comprado"
                     cur.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (p_id,))
                     
                     # Si todavía falta algo por comprar, lo insertamos de nuevo
@@ -399,7 +399,7 @@ class RecetasPendientesFrame(tk.Frame):
                         """, (p_id, cantidad_comprar, unidad_p))
                         print(f"DEBUG: Insertado en lista_compras: {nombre_p} x {cantidad_comprar}")
 
-                conn.commit() # ¡FUNDAMENTAL!
+                conn.commit()
                 messagebox.showinfo("Éxito", "Lista de compras sincronizada.")
                 self.cargar()
 
