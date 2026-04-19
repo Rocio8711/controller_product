@@ -6,9 +6,8 @@ import sqlite3
 from InicializacionBaseDatos.acceso_base_datos import conexion
 from inventario import ver_inventario
 
-# ==========================================
-# 📦 INVENTARIO
-# ==========================================
+'''VENTANA DE INVENTARIO'''
+
 class InventarioFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)

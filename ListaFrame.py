@@ -1,24 +1,26 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-
-# Importamos las funciones de tu lógica
 from lista_compras import ver_tareas_todas, marcar_comprado
 
-
 from mandar_email import enviar_lista_email
+
+'''VENTANA DE LISTA DE COMPRAS'''
 
 class ListaFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        
+        #guardamos una referencia al controlador principal para poder acceder a configuraciones como el modo oscuro
         self.controller = controller
 
         self.config(height=600)
+        #evitamos que el frame cambie de tamaño según sus widgets internos
         self.pack_propagate(False)
-
+        #construimos la interfaz grafica
         self.setup_ui()
 
     def setup_ui(self):
-        # 🧹 Limpiamos el frame
+        #eliminamos todos los widgets actuales para reconstruir la interfaz
         for widget in self.winfo_children():
             widget.destroy()
 
@@ -29,7 +31,7 @@ class ListaFrame(tk.Frame):
 
         self.configure(bg=bg)
 
-        # 2. Botón de Modo Oscuro
+        #colocamos el botón en la esquina superior derecha
         self.toggle_btn = tk.Button(
             self, text="☀️" if modo else "🌙",
             command=self.alternar_modo,
@@ -39,7 +41,7 @@ class ListaFrame(tk.Frame):
         )
         self.toggle_btn.place(relx=0.98, rely=0.02, anchor="ne")
 
-    # 🚪 BOTÓN CERRAR SESIÓN (Justo debajo del modo oscuro)
+    #BOTÓN CERRAR SESIÓN 
         self.logout_btn = tk.Button(
             self, text="🚪",
             command=self.cerrar_sesion,
@@ -50,11 +52,11 @@ class ListaFrame(tk.Frame):
         self.logout_btn.place(relx=0.98, rely=0.07, anchor="ne")
 
         # --- TÍTULO ---
-        # --- CONTENEDOR DEL TÍTULO (Frame para alinear icono y texto) ---
+        #creamos un contenedor para alinear correctamente el icono y el texto
         header_lista = tk.Frame(self, bg=bg)
         header_lista.pack(pady=(15, 5))
 
-        # 1. El Icono del Carrito (Color Gris Metálico / Azulado)
+        #ponemos el icono del carrito
         tk.Label(
             header_lista, 
             text="🛒",
@@ -63,7 +65,7 @@ class ListaFrame(tk.Frame):
             fg="#455A64"  # Un gris azulado para el metal del carrito
         ).pack(side="left", padx=5)
 
-        # 2. El Texto del Título (Verde Fuerte)
+        #mostramos el título principal de la pantalla
         tk.Label(
             header_lista, 
             text="LISTA DE COMPRA",
@@ -71,8 +73,9 @@ class ListaFrame(tk.Frame):
             bg=bg, 
             fg=verde_fuerte
         ).pack(side="left")
+
         # --- BOTÓN VOLVER (SITUACIÓN IGUALADA) ---
-        # volver
+        #creamos un botón que nos permite volver a la pantalla principal
         self.btn_volver = tk.Button(
             self, text="⬅ Volver",
             bg="#444444" if modo else "#E0E0E0",
@@ -80,25 +83,31 @@ class ListaFrame(tk.Frame):
             command=self.ir_a_home
         ).pack(pady=5)
 
-        # --- TABLA ---
+        # --- TABLA de PRODUCTOS ---
+        #creamos un contenedor para la tabla y su barra de desplazamiento
         frame_tabla = tk.Frame(self, bg=bg)
         frame_tabla.pack(fill="both", expand=True, padx=20, pady=10)
 
+        #definimos las columnas que tendra la tabla
         columnas = ("ID", "Producto", "Cantidad", "Unidad")
         self.tree = ttk.Treeview(frame_tabla, columns=columnas, show="headings", height=12)
 
+        #configuramos los encabezados y tamaños de cada columna
         for col in columnas:
             self.tree.heading(col, text=col)
             ancho = 60 if col == "ID" else 150
             self.tree.column(col, anchor="center", width=ancho)
 
+        #mostramos la tabla ocupando el espacio disponible
         self.tree.pack(side="left", fill="both", expand=True)
 
+        #añadimos una barra de desplazamiento vertical para la tabla
         scrollbar = tk.Scrollbar(frame_tabla, orient="vertical", command=self.tree.yview)
         scrollbar.pack(side="right", fill="y")
         self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # --- BOTONES DE ACCIÓN (Alineados y con estilo) ---
+        # --- BOTONES DE ACCIÓN
+        #creamos un contenedor para agrupar los botones inferiores
         btn_frame = tk.Frame(self, bg=bg)
         btn_frame.pack(pady=20)
 
@@ -126,8 +135,9 @@ class ListaFrame(tk.Frame):
         self.cargar()
 
     def alternar_modo(self):
-        """Cambia el modo en el controlador y refresca esta pantalla"""
+    #cambiamos el modo (claro/oscuro) usando el controlador principal
         self.controller.toggle_modo_oscuro()
+        #reconstruimos la interfaz para aplicar los nuevos colores
         self.setup_ui()
 
     def ir_a_home(self):
@@ -135,20 +145,25 @@ class ListaFrame(tk.Frame):
         self.controller.show_frame(HomeFrame)
 
     def cargar(self):
+        #limpiamos todos los elementos actuales de la tabla
         self.tree.delete(*self.tree.get_children())
         try:
-            datos = ver_tareas_todas() 
+            #obtenemos todos los datos de la lista de la compra desde la base de datos
+            datos = ver_tareas_todas()
+            #recorremos los datos y los insertamos en la tabla
             for fila in datos:
                 self.tree.insert("", "end", values=fila)
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo cargar la lista: {e}")
 
     def marcar(self):
+        #obtenemos el elemento seleccionado en la tabla
         seleccion = self.tree.selection()
         if not seleccion:
+            #avisamos si no hemos seleccionado nada
             messagebox.showwarning("Atención", "Selecciona un producto.")
             return
-
+        #recuperamos los datos del elemento seleccionado
         item = self.tree.item(seleccion[0])
         valores = item["values"]
         item_id = valores[0]
@@ -156,8 +171,9 @@ class ListaFrame(tk.Frame):
 
         try:
             marcar_comprado(item_id) 
-            # ✅ Mantenemos el mensaje de confirmación que querías
+            #mostramos un mensaje de confirmación al usuario
             messagebox.showinfo("Actualizado", f"'{nombre_prod}' se ha marcado como comprado.")
+            #recargamos la tabla para reflejar el cambio
             self.cargar()
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo marcar: {e}")
@@ -165,16 +181,17 @@ class ListaFrame(tk.Frame):
 
 
     def cerrar_sesion(self):
+            #preguntamos al usuario si está seguro de cerrar sesión
             if messagebox.askyesno("Cerrar Sesión", "¿Estás seguro de que quieres salir?"):
-                # 1. Borramos rastro del usuario en el controlador
+                #borramos rastro del usuario en el controlador
                 self.controller.usuario_email = None
                 
-                # 2. Cerramos la ventana actual de la App
+                #cerramos la ventana actual de la App
                 self.controller.destroy()
                 
-                # 3. Lanzamos de nuevo el LoginApp
+                #lanzamos de nuevo el LoginApp
                 import tkinter as tk
-                from login import LoginApp # Importamos la clase de tu archivo login.py
+                from login import LoginApp 
                 
                 root_login = tk.Tk()
                 LoginApp(root_login)
@@ -183,54 +200,57 @@ class ListaFrame(tk.Frame):
 
 
     def enviar_email(self):
-        # 1. 🛡️ ACTIVAMOS MODO ESPERA
+        # ACTIVAMOS MODO ESPERA
+        #cambiamos el cursor a modo carga para indicar que estamos procesando
         self.config(cursor="watch") 
         self.update_idletasks()
 
-        
+        #creamos una lista donde guardaremos los productos a enviar
         productos = []
         for item in self.tree.get_children():
             valores = self.tree.item(item)["values"]
 
-            # Comprobación de seguridad para el índice
+            #comprobamos que el producto no esté ya marcado como comprado
             if len(valores) > 4 and valores[4] == "comprado":
                 continue
 
-            # Formateamos bonito el string para el email
+            #formateamos el texto del producto para el email
             productos.append(f"🛒 {valores[1]} - Cantidad: {valores[2]} {valores[3]}")
-
+        #si no hay productos pendientes mostramos aviso
         if not productos:
             messagebox.showwarning("Vacío", "No hay productos pendientes para enviar.")
             return
 
-        # Recuperar credenciales del controlador
+        #recuperamos las credenciales desde el controlador
         destinatario = getattr(self.controller, 'usuario_email', None)
         email_user = getattr(self.controller, 'email_user', None)
         email_pass = getattr(self.controller, 'email_pass', None)
 
+        #comprobamos que tenemos todos los datos necesarios
         if not destinatario or not email_user or not email_pass:
             messagebox.showerror("Configuración", "Faltan las credenciales de email en el sistema.")
             return
 
         try:
-            # Llamada a la función externa que creamos antes
-            from mandar_email import enviar_lista_email # Asegúrate de importar la función
+            from mandar_email import enviar_lista_email
             
+            #llamamos a la función para enviar la lista
             ok = enviar_lista_email(
                 destinatario,
                 productos,
                 email_user,
                 email_pass
             )
-
+            #ponemos mensajito al usuario
             if ok:
                 messagebox.showinfo("Éxito", f"Lista enviada a:\n{destinatario} ✉️")
             else:
                 messagebox.showerror("Error", "El servidor SMTP rechazó la conexión.\nRevisa tu Contraseña de Aplicación.")
 
         except Exception as e:
+            #capturamos cualquier error inesperado
             messagebox.showerror("Error Crítico", f"Ocurrió un error inesperado:\n{e}")
 
         finally:
-            # 2. 🛡️ RESTABLECEMOS EL CURSOR (Ocurra un error o no)
+            #restblecemos el cursor
             self.config(cursor="")
