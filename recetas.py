@@ -9,6 +9,7 @@ def agregar_receta(nombre):
         return
     cursor = conexion_bd.cursor()
 
+    # insertamos la nueva receta en la base de datos
     cursor.execute("INSERT INTO recetas (nombre) VALUES (?)", (nombre,))
 
     conexion_bd.commit()
@@ -21,6 +22,7 @@ def agregar_ingrediente_a_receta(receta_id, producto_id, cantidad, unidad):
     if not conexion_bd: return
     cursor = conexion_bd.cursor()
 
+    # insertamos el ingrediente en la receta
     cursor.execute("""
         INSERT INTO receta_ingredientes (receta_id, producto_id, cantidad, unidad)
         VALUES (?, ?, ?, ?)
@@ -29,18 +31,19 @@ def agregar_ingrediente_a_receta(receta_id, producto_id, cantidad, unidad):
     conexion_bd.commit()
     conexion_bd.close()
     
-    # 🔥 NUEVO: Recalcular la lista de compras por si esta receta está en el planificador
+    # recalculamos la necesidad de compra del producto afectado
     recalcular_necesidad_producto(producto_id)
     
     print(f"Ingrediente añadido y stock sincronizado.")
 
 
 def modificar_cantidad_ingrediente(receta_id, producto_id, nueva_cantidad):
-    """Actualiza la cantidad de un ingrediente y sincroniza la compra"""
     conexion_bd = conexion()
-    if not conexion_bd: return
+    if not conexion_bd:
+        return
     cursor = conexion_bd.cursor()
-    
+
+    # actualizamos la cantidad de un ingrediente
     cursor.execute("""
         UPDATE receta_ingredientes 
         SET cantidad = ? 
@@ -50,7 +53,7 @@ def modificar_cantidad_ingrediente(receta_id, producto_id, nueva_cantidad):
     conexion_bd.commit()
     conexion_bd.close()
 
-    # 🔥 La "Reacción en cadena"
+    # recalculamos la lista de compras
     recalcular_necesidad_producto(producto_id)
 
 def preparar_receta(receta_id):
@@ -58,7 +61,7 @@ def preparar_receta(receta_id):
     if not conexion_bd: return False
     cursor = conexion_bd.cursor()
 
-    # 1. Consultar ingredientes necesarios vs stock actual
+    # consultamos ingredientes necesarios vs stock actual
     cursor.execute("""
         SELECT ri.producto_id, ri.cantidad, p.cantidad, p.nombre, ri.unidad
         FROM receta_ingredientes ri
@@ -67,7 +70,7 @@ def preparar_receta(receta_id):
     """, (receta_id,))
     ingredientes = cursor.fetchall()
 
-    # 2. Validar faltantes
+    # comprobamos si hay stock suficiente
     faltantes = []
     for pid, cant_nec, stock_act, nombre, unidad in ingredientes:
         if stock_act < cant_nec:
@@ -79,7 +82,7 @@ def preparar_receta(receta_id):
         conexion_bd.close()
         return False, mensaje
 
-    # 3. Si todo está OK, descontar stock
+    # si todo está correcto, descontamos stock
     try:
         for pid, cant_nec, stock_act, nombre, unidad in ingredientes:
             cursor.execute("UPDATE productos SET cantidad = cantidad - ? WHERE id = ?", (cant_nec, pid))
@@ -100,6 +103,7 @@ def generar_lista_desde_receta(receta_id, usuario_id=None):
 
     cursor = conexion_bd.cursor()
 
+    # obtenemos ingredientes de la receta
     cursor.execute("""
         SELECT ri.producto_id, ri.cantidad, ri.unidad, p.cantidad
         FROM receta_ingredientes ri
@@ -109,12 +113,13 @@ def generar_lista_desde_receta(receta_id, usuario_id=None):
 
     ingredientes = cursor.fetchall()
 
+    # generamos lista de compra si falta stock
     for producto_id, cantidad_receta, unidad, stock_actual in ingredientes:
 
         if stock_actual < cantidad_receta:
             cantidad_faltante = cantidad_receta - stock_actual
 
-            # 🔥 BUSCAR SI YA EXISTE EN LISTA
+            # comprobamos si ya existe en la lista
             cursor.execute("""
                 SELECT id, cantidad
                 FROM lista_compras
@@ -123,14 +128,14 @@ def generar_lista_desde_receta(receta_id, usuario_id=None):
             existe = cursor.fetchone()
 
             if existe:
-                # 🔥 ACTUALIZAR EXISTENTE (CORRECTO)
+                # actualizamos cantidad existente
                 cursor.execute("""
                     UPDATE lista_compras
                     SET cantidad = cantidad + ?
                     WHERE id = ?
                 """, (cantidad_faltante, existe[0]))
             else:
-                # 🔥 INSERTAR NUEVO
+                # insertamos nuevo registro
                 cursor.execute("""
                     INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado, usuario_id_asignado)
                     VALUES (?, ?, ?, 0, ?)
@@ -163,7 +168,7 @@ def recalcular_necesidad_producto(producto_id):
     conexion_bd = conexion()
     cursor = conexion_bd.cursor()
     
-    # A. Sumar lo que piden todas las recetas PENDIENTES en el planificador
+   # sumamos lo que piden las recetas pendientes
     cursor.execute("""
         SELECT SUM(ri.cantidad) 
         FROM receta_ingredientes ri
@@ -172,7 +177,7 @@ def recalcular_necesidad_producto(producto_id):
     """, (producto_id,))
     total_planificador = cursor.fetchone()[0] or 0
 
-    # B. Obtener stock actual y mínimo
+    # obtenemos stock y mínimo
     cursor.execute("SELECT cantidad, stock_minimo, unidad FROM productos WHERE id = ?", (producto_id,))
     prod_data = cursor.fetchone()
     if not prod_data: 
@@ -181,11 +186,11 @@ def recalcular_necesidad_producto(producto_id):
     
     stock_actual, stock_min, unidad = prod_data
 
-    # C. Cálculo Maestro
+    # cálculo final de compra necesaria
     necesidad_total = total_planificador + stock_min
     cantidad_a_comprar = round(max(0, necesidad_total - stock_actual), 2)
 
-    # D. Actualizar la tabla lista_compras (Solo lo que no se ha comprado aún)
+    # actualizamos la tabla lista_compras (Solo lo que no se ha comprado aún)
     cursor.execute("DELETE FROM lista_compras WHERE producto_id = ? AND comprado = 0", (producto_id,))
     
     if cantidad_a_comprar > 0:

@@ -6,6 +6,7 @@ def login(email, contrasena):
     conn = conexion()
     cursor = conn.cursor()
 
+    # buscamos usuario que coincida con email y contrasena
     cursor.execute(
         "SELECT id, nombre FROM usuarios WHERE email = ? AND contrasena = ?",
         (email, contrasena)
@@ -24,7 +25,7 @@ def agregar_usuario(nombre, email, contrasena):
         print("El usuario ya existe")
         conn.close()
         return
-
+    # insertamos nuevo usuario en la base de datos
     cursor.execute(
         "INSERT INTO usuarios (nombre, email, contrasena) VALUES (?, ?, ?)",
         (nombre, email, contrasena)
@@ -32,48 +33,5 @@ def agregar_usuario(nombre, email, contrasena):
     conn.commit()
 
 
-'''def agregar_usuario(nombre,email,contrasena):
-    conexion_bd = conexion()
-    if not conexion_bd:
-        return
-    cursor = conexion_bd.cursor()
-    if comprobar_existe_usuario(email):
-        print("El usuario ya existe")
-        conexion_bd.close()
-        return
-    cursor.execute("INSERT INTO usuarios (nombre, email, contrasena) VALUES (?, ?, ?)", (nombre, email, contrasena))
-    conexion_bd.commit()
-    conexion_bd.close()
-    print(f"Usuario '{nombre}' creado.")
-
-def comprobar_existe_usuario(email, contrasena):
-    conexion_bd = conexion()
-    if not conexion_bd:
-        return False
-
-    cursor = conexion_bd.cursor()
-
-    cursor.execute(
-        "SELECT id FROM usuarios WHERE email = ? AND contrasena = ?",
-        (email, contrasena)
-    )
-
-    resultado = cursor.fetchone()
-
-    conexion_bd.close()
-
-    return resultado is not None
-
-def comprobar_contrasena(email, contrasena):
-    conexion_bd = conexion()
-    if not conexion_bd:
-        return False
-    cursor = conexion_bd.cursor()
-    cursor.execute("SELECT id FROM usuarios WHERE email = ? AND contrasena = ?",(email, contrasena))
-
-    resultado = cursor.fetchone()
-    conexion_bd.close()
-
-    return resultado is not None'''
 
 

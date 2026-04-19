@@ -7,6 +7,7 @@ def mostrar_lista_compras():
         return
 
     cursor = conexion_bd.cursor()
+    # obtenemos todos los productos de la lista de compras con su estado
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad, u.nombre, lc.comprado
         FROM lista_compras lc
@@ -17,7 +18,7 @@ def mostrar_lista_compras():
     lista = cursor.fetchall()
 
     print("\n=== LISTA DE COMPRAS ===")
-
+    # mostramos cada elemento con su estado y responsable
     for item_id, nombre, cantidad, unidad, usuario, comprado in lista:
         estado = "✔ Comprado" if comprado else "❌ Pendiente"
         asignado = usuario if usuario else "Sin asignar"
@@ -27,9 +28,9 @@ def mostrar_lista_compras():
     conexion_bd.close()
 
 
-# =========================
+
 # ✅ MARCAR COMO COMPRADO + ACTUALIZAR INVENTARIO
-# =========================
+
 def marcar_comprado(item_id):
     conn = conexion()
     if not conn:
@@ -38,7 +39,7 @@ def marcar_comprado(item_id):
     cursor = conn.cursor()
 
     try:
-        # 1. Obtener datos de la lista
+        # obtenemos el producto asociado a la compra pendiente
         cursor.execute("""
             SELECT producto_id, cantidad 
             FROM lista_compras 
@@ -53,14 +54,14 @@ def marcar_comprado(item_id):
 
         producto_id, cantidad = resultado
 
-        # 2. Marcar como comprado
+        # marcamos el producto como comprado
         cursor.execute("""
             UPDATE lista_compras
             SET comprado = 1
             WHERE id = ?
         """, (item_id,))
 
-        # 3. Sumar al inventario
+        # actualizamos el inventario sumando la cantidad comprada
         cursor.execute("""
             UPDATE productos
             SET cantidad = cantidad + ?
@@ -78,15 +79,16 @@ def marcar_comprado(item_id):
         conn.close()
 
 
-# =========================
-# 📋 VER TAREAS
-# =========================
+
+# VER TAREAS
+
 def ver_tareas_usuario(usuario_id):
     conexion_bd = conexion()
     if not conexion_bd:
         return []
 
     cursor = conexion_bd.cursor()
+    # obtenemos recetas pendientes asignadas a un usuario
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad
         FROM lista_compras lc
@@ -99,13 +101,14 @@ def ver_tareas_usuario(usuario_id):
 
     return resultados
 
-
-def ver_tareas_todas():
+#  VER lista de compra
+def ver_lista_compra():
     conexion_bd = conexion()
     if not conexion_bd:
         return []
 
     cursor = conexion_bd.cursor()
+    # obtenemos todas las tareas pendientes
     cursor.execute("""
         SELECT lc.id, p.nombre, lc.cantidad, lc.unidad
         FROM lista_compras lc
@@ -119,9 +122,9 @@ def ver_tareas_todas():
     return resultados
 
 
-# =========================
-# 🧾 GENERAR LISTA DESDE RECETA
-# =========================
+
+# GENERAR LISTA DESDE RECETA
+
 def generar_lista_desde_receta(receta_id):
     conn = conexion()
     if not conn:
@@ -130,6 +133,7 @@ def generar_lista_desde_receta(receta_id):
     cursor = conn.cursor()
 
     try:
+        # obtenemos los ingredientes de la receta
         cursor.execute("""
             SELECT ri.producto_id, ri.cantidad_necesaria, p.stock, p.nombre, p.unidad
             FROM receta_ingredientes ri
@@ -139,11 +143,12 @@ def generar_lista_desde_receta(receta_id):
 
         ingredientes = cursor.fetchall()
 
+        # calculamos lo que falta de cada producto
         for prod_id, cant_necesaria, stock_actual, nombre, unidad in ingredientes:
             if stock_actual < cant_necesaria:
                 faltante = cant_necesaria - stock_actual
 
-                # Verificar si ya existe en lista
+                #comprobamos si ya existe en la lista
                 cursor.execute("""
                     SELECT id FROM lista_compras 
                     WHERE producto_id = ? AND comprado = 0
@@ -152,12 +157,14 @@ def generar_lista_desde_receta(receta_id):
                 existe = cursor.fetchone()
 
                 if existe:
+                    # si ya existe, aumentamos la cantidad
                     cursor.execute("""
                         UPDATE lista_compras 
                         SET cantidad = cantidad + ? 
                         WHERE id = ?
                     """, (faltante, existe[0]))
                 else:
+                    # si no existe, lo añadimos
                     cursor.execute("""
                         INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
                         VALUES (?, ?, ?, 0)
@@ -173,14 +180,15 @@ def generar_lista_desde_receta(receta_id):
         conn.close()
 
 
-# =========================
-# 🍳 PREPARAR RECETA (RESTAR STOCK)
-# =========================
+
+#PREPARAR RECETA restando stock
+
 def preparar_receta(receta_id):
     conn = conexion()
     cursor = conn.cursor()
 
     try:
+        # reducimos el stock de los productos usados en la receta
         cursor.execute("""
             UPDATE productos 
             SET stock = stock - (

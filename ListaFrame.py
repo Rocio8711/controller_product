@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from lista_compras import ver_tareas_todas, marcar_comprado
+from lista_compras import ver_lista_compra, marcar_comprado
 
 from mandar_email import enviar_lista_email
 
@@ -149,7 +149,7 @@ class ListaFrame(tk.Frame):
         self.tree.delete(*self.tree.get_children())
         try:
             #obtenemos todos los datos de la lista de la compra desde la base de datos
-            datos = ver_tareas_todas()
+            datos = ver_lista_compra()
             #recorremos los datos y los insertamos en la tabla
             for fila in datos:
                 self.tree.insert("", "end", values=fila)

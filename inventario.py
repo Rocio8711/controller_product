@@ -1,9 +1,7 @@
 from InicializacionBaseDatos.acceso_base_datos import conexion
 
 
-# =========================
-# ⚠️ VERIFICAR STOCK MÍNIMO
-# =========================
+# VERIFICAR STOCK MÍNIMO
 def verificar_stock_minimo():
     conn = conexion()
     if not conn:
@@ -12,7 +10,7 @@ def verificar_stock_minimo():
     cursor = conn.cursor()
 
     try:
-        # Productos por debajo del mínimo
+        #buscamos todos los productos que están por debajo del stock mínimo
         cursor.execute("""
             SELECT id, nombre, cantidad, stock_minimo, unidad
             FROM productos
@@ -21,10 +19,12 @@ def verificar_stock_minimo():
 
         productos_bajo_stock = cursor.fetchall()
 
+        #recorremos cada producto con stock insuficiente
         for producto_id, nombre, cantidad, stock_minimo, unidad in productos_bajo_stock:
+            #calculamos cuánto necesitamos reponer para llegar al mínimo
             cantidad_a_comprar = stock_minimo - cantidad
 
-            # 🔥 IMPORTANTE: solo mirar pendientes (comprado = 0)
+            #comprobamos si el producto ya existe en la lista de compras (sin comprar)
             cursor.execute("""
                 SELECT id, cantidad 
                 FROM lista_compras 
@@ -36,7 +36,7 @@ def verificar_stock_minimo():
             if resultado:
                 lista_id, cantidad_existente = resultado
 
-                # 🔥 SUMAR en vez de sobrescribir (evita perder datos)
+                #si ya existe, sumamos la nueva necesidad para no perder información previa
                 cursor.execute("""
                     UPDATE lista_compras
                     SET cantidad = cantidad + ?
@@ -44,7 +44,7 @@ def verificar_stock_minimo():
                 """, (cantidad_a_comprar, lista_id))
 
             else:
-                # Insertar nuevo en lista
+                #si no existe, lo añadimos a la lista de compras
                 cursor.execute("""
                     INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado)
                     VALUES (?, ?, ?, 0)
@@ -62,16 +62,15 @@ def verificar_stock_minimo():
         conn.close()
 
 
-# =========================
-# 📦 VER INVENTARIO
-# =========================
+
+# VER INVENTARIO
 def ver_inventario():
     conn = conexion()
     if not conn:
         return []
 
     cursor = conn.cursor()
-
+    #obtenemos todos los productos del inventario
     cursor.execute("""
         SELECT id, nombre, cantidad, unidad, stock_minimo
         FROM productos
@@ -79,5 +78,5 @@ def ver_inventario():
 
     datos = cursor.fetchall()
     conn.close()
-
+    #devolvemos la lista de productos
     return datos

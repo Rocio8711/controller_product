@@ -13,7 +13,7 @@ class LoginApp:
         self.root.configure(bg="#F8F9FA")
         #self.root.eval('tk::PlaceWindow . center')
 
-
+        #centramos la ventana en pantalla
         self.root.update_idletasks()
 
         ancho = 400
@@ -26,7 +26,7 @@ class LoginApp:
 
 
 
-
+        #creamos contenedor principal del login
         self.container = tk.Frame(root, bg="#F8F9FA", pady=20)
         self.container.pack(expand=True)
 
@@ -48,6 +48,7 @@ class LoginApp:
         self.password_entry = tk.Entry(self.container, font=("Segoe UI", 12), width=30, show="*", fg="#2E7D32")
         self.password_entry.pack(pady=(5, 10), ipady=5)
 
+        #opción para mostrar/ocultar contraseña
         self.show_pass = tk.BooleanVar()
         tk.Checkbutton(
             self.container,
@@ -84,10 +85,11 @@ class LoginApp:
             cursor="hand2"
         ).pack(pady=10)
 
-    # =====================================================
-    # ALERTA MODERNA
-    # =====================================================
+
+    # ALERTA si estan mal algun dato
+
     def mostrar_alerta(self, titulo, mensaje, tipo="info"):
+        #creamos ventana emergente de alerta
         alerta = tk.Toplevel(self.root)
         alerta.title(titulo)
         alerta.geometry("320x200")
@@ -95,12 +97,16 @@ class LoginApp:
         alerta.resizable(False, False)
         alerta.grab_set()
 
+        #definimos color e icono según tipo
         color = "#2E7D32" if tipo == "info" else "#D32F2F"
+        #icono de estado
         icono = "✅" if tipo == "info" else "❌"
 
+        #icono de estado,mensaje
         tk.Label(alerta, text=icono, font=("Segoe UI", 25), bg="white", fg=color).pack(pady=10)
         tk.Label(alerta, text=mensaje, bg="white", wraplength=280, font=("Segoe UI", 11)).pack(pady=10)
 
+        #botón aceptar
         tk.Button(
             alerta,
             text="OK",
@@ -136,7 +142,7 @@ class LoginApp:
 
         toast.geometry(f"+{int(x)}+{int(y)}")
 
-        # caja “moderna”
+        # contenedor  “moderna”
         frame = tk.Frame(toast, bg=color_bg, padx=30, pady=18)
         frame.pack()
 
@@ -148,49 +154,55 @@ class LoginApp:
             font=("Segoe UI", 16, "bold")
         ).pack()
 
+        #cerramos automáticamente
         toast.after(2500, toast.destroy)
 
 
-    # =====================================================
+
     def toggle_password(self):
         self.password_entry.config(
             show="" if self.show_pass.get() else "*"
         )
 
-    # =====================================================
     # LOGIN
-    # =====================================================
     def login(self):
+        #recogemos credenciales
         email = self.email_entry.get().strip().lower()
         password = self.password_entry.get()
 
+        #validamos campos vacíos
         if not email or not password:
             self.mostrar_alerta("Error", "Rellena todos los campos", "error")
             return
 
+        #intentamos autenticar usuario
         usuario = login_bd(email, password)
 
         if usuario:
+            #obtenemos nombre del usuario
             nombre = usuario[1].capitalize()
 
+            #mostramos bienvenida
             self.mostrar_bienvenida(nombre)
 
+            #pasamos al sistema principal tras breve espera
             self.root.after(2000, lambda: self.finalizar_login(email))
 
 
         else:
+            #error de autenticación
             self.mostrar_alerta("Error", "Credenciales incorrectas", "error")
 
+    # cerramos login y abrimos aplicación principal
     def finalizar_login(self, email):
         self.root.destroy()
         app = App()
         app.usuario_email = email
         app.mainloop()
 
-    # =====================================================
-    # VENTANA DE GESTOR (MEJORADA)
-    # =====================================================
+    # ACCESO A REGISTRO
     def abrir_seguridad(self):
+        # abrimos ventana de verificación de administrador
         v = tk.Toplevel(self.root)
         v.title("Acceso de Administrador")
         v.geometry("350x250")
@@ -228,9 +240,7 @@ class LoginApp:
             width=20
         ).pack(pady=20)
 
-    # =====================================================
-    # REGISTRO CON VALIDACIONES COMPLETAS
-    # =====================================================
+    # REGISTRO DE USUARIO
     def abrir_registro(self):
         reg = tk.Toplevel(self.root)
         reg.title("Registro de Usuario")
@@ -246,9 +256,8 @@ class LoginApp:
             fg="#2E7D32"
         ).pack(pady=15)
 
-        # =====================================================
-        # ❓ AYUDA CONTRASEÑA
-        # =====================================================
+
+        # mostramos requisitos de contraseña
         def ayuda():
             self.mostrar_alerta(
                 "Requisitos contraseña",
@@ -269,9 +278,7 @@ class LoginApp:
             command=ayuda
         ).pack(pady=5)
 
-        # =====================================================
-        # CAMPOS
-        # =====================================================
+        # creamos campos de entrada
         def campo(texto, show=None):
             tk.Label(reg, text=texto, bg="#F8F9FA").pack(anchor="w", padx=40)
             e = tk.Entry(reg, width=30, show=show)
@@ -283,9 +290,7 @@ class LoginApp:
         pas = campo("Contraseña", show="*")
         pas2 = campo("Repite la contraseña", show="*")
 
-        # =====================================================
-        # 👁️ MOSTRAR CONTRASEÑA
-        # =====================================================
+        # mostrar/ocultar contraseña
         ver_pass = tk.BooleanVar()
 
         def toggle_pass():
@@ -298,15 +303,13 @@ class LoginApp:
                     command=toggle_pass,
                     bg="#F8F9FA").pack(anchor="w", padx=40)
 
-        # =====================================================
-        # GUARDAR USUARIO
-        # =====================================================
+        # guardamos usuario validando campos
         def guardar():
             n = nom.get()
             e = ema.get().strip().lower()
             p = pas.get()
 
-            # VALIDACIONES CON ALERTAS MODERNAS
+            # VALIDACIONES CON ALERTAS
             if not n.strip():
                 self.mostrar_alerta("Error", "El nombre no puede estar vacío", "error")
                 return
@@ -331,8 +334,6 @@ class LoginApp:
                 self.mostrar_alerta("Error", "Debe tener al menos un número", "error")
                 return
 
-
-            #como las app reales regex
             if not re.search(r"[!@#$%^&*()\-_=+\[\]{};:'\",.<>?/]", p):
                 self.mostrar_alerta("Error", "Debe tener al menos un símbolo", "error")
                 return
@@ -350,9 +351,7 @@ class LoginApp:
             except Exception:
                 self.mostrar_alerta("Error", "No se pudo crear el usuario", "error")
 
-        # =====================================================
-        # BOTÓN FINAL
-        # =====================================================
+        # botón final de registro
         tk.Button(
             reg,
             text="Crear Cuenta",
@@ -366,10 +365,10 @@ class LoginApp:
         ).pack(pady=20)
 
 
-    #mensaje chulo!
+    # mostramos mensaje de bienvenida
     def mostrar_bienvenida(self, nombre):
         self.mostrar_notificacion(f"👋 Hola, {nombre}", "#2E7D32")
-# =====================================================
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = LoginApp(root)

@@ -1,8 +1,6 @@
 import sqlite3
 
-# =====================================================
 # CONEXIÓN
-# =====================================================
 def conexion(db_name="controllerproduct.db"):
     try:
         conn = sqlite3.connect(db_name, timeout=10)
@@ -14,9 +12,8 @@ def conexion(db_name="controllerproduct.db"):
         print(f"Error al conectar a la base de datos: {e}")
         return None
 
-# =====================================================
-# CREACIÓN DE TABLAS (ORDEN CORRECTO)
-# =====================================================
+
+# CREACIÓN DE TABLAS
 def crear_tablas():
     conn = conexion()
     if not conn:
@@ -68,7 +65,7 @@ def crear_tablas():
         )
         """)
 
-        # 5. LISTA COMPRAS (Corregida con CASCADE)
+        # 5. LISTA COMPRAS 
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS lista_compras (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,7 +80,6 @@ def crear_tablas():
         """)
 
         # 6. RECETAS PENDIENTES (PLANIFICADOR)
-        # Movido antes del commit para evitar el error de base de datos cerrada
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS recetas_pendientes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,7 +97,6 @@ def crear_tablas():
         print(f"Error al crear las tablas: {e}")
         conn.rollback()
     finally:
-        # El cierre se ejecuta SIEMPRE al final de todas las operaciones
         conn.close()
 
 if __name__ == "__main__":

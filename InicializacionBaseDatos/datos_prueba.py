@@ -4,17 +4,13 @@ from datetime import datetime, timedelta
 
 DB_NAME = "controllerproduct.db"
 
-# =====================================================
 # CONEXIÓN
-# =====================================================
 def conexion():
     conn = sqlite3.connect(DB_NAME)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
-# =====================================================
 # USUARIOS
-# =====================================================
 def insertar_usuarios(cursor):
     usuarios = [
         ("Ana", "ana@gmail.com", "1234"),
@@ -28,9 +24,7 @@ def insertar_usuarios(cursor):
         usuarios
     )
 
-# =====================================================
 # PRODUCTOS
-# =====================================================
 def insertar_productos(cursor):
     productos = [
         ("Harina", 10, "kg", 2),
@@ -55,9 +49,8 @@ def insertar_productos(cursor):
         productos
     )
 
-# =====================================================
-# RECETAS (20)
-# =====================================================
+
+# RECETAS 
 def insertar_recetas(cursor):
     recetas = [
         "Tortilla", "Bizcocho", "Pancakes", "Galletas", "Pizza",
@@ -71,9 +64,8 @@ def insertar_recetas(cursor):
         [(r,) for r in recetas]
     )
 
-# =====================================================
+
 # INGREDIENTES AUTOMÁTICOS
-# =====================================================
 def insertar_receta_ingredientes(cursor):
     cursor.execute("SELECT id FROM recetas")
     recetas = [r[0] for r in cursor.fetchall()]
@@ -99,9 +91,8 @@ def insertar_receta_ingredientes(cursor):
         VALUES (?, ?, ?, ?)
     """, ingredientes)
 
-# =====================================================
+
 # LISTA DE COMPRAS
-# =====================================================
 def insertar_lista_compras(cursor):
     cursor.execute("SELECT id FROM productos")
     productos = [row[0] for row in cursor.fetchall()]
@@ -125,9 +116,8 @@ def insertar_lista_compras(cursor):
         VALUES (?, ?, ?, ?, ?)
     """, lista)
 
-# =====================================================
+
 # RECETAS PENDIENTES
-# =====================================================
 def insertar_recetas_pendientes(cursor):
     cursor.execute("SELECT id FROM recetas")
     recetas = [row[0] for row in cursor.fetchall()]
@@ -143,9 +133,7 @@ def insertar_recetas_pendientes(cursor):
         VALUES (?, ?, ?)
     """, pendientes)
 
-# =====================================================
 # EJECUCIÓN
-# =====================================================
 def generar_datos():
     conn = conexion()
     cursor = conn.cursor()

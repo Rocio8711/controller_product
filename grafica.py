@@ -11,7 +11,7 @@ from ListaFrame import ListaFrame
 from RecetasPendientesFrame import RecetasPendientesFrame
 
 #importamos las funciones que manejan la logica de productos y recetas
-from lista_compras import marcar_comprado, ver_tareas_todas
+from lista_compras import marcar_comprado, ver_lista_compra
 from recetas import generar_lista_desde_receta, obtener_recetas, preparar_receta
 from inventario import ver_inventario
 from InicializacionBaseDatos.acceso_base_datos import conexion
