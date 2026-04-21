@@ -363,14 +363,26 @@ class RecetasFrame(tk.Frame):
         try:
             conn = conexion()
             cur = conn.cursor()
+
+
+
+            #para recaalcular la listad e la compra
+            cur.execute("select producto_id from receta_ingredientes WHERE receta_id=?", (rid,))
+            lista_productos_id=cur.fetchall()
             
             #borramos primero los ingredientes asociados
             cur.execute("DELETE FROM receta_ingredientes WHERE receta_id=?", (rid,))
+
             #borramos la receta
             cur.execute("DELETE FROM recetas WHERE id=?", (rid,))
             
+
+
             conn.commit()
             print("Borrado exitoso.")
+
+            for pid in lista_productos_id:
+                recalcular_necesidad_producto(pid[0])
 
         except Exception as e:
             print(f"Error al borrar: {e}")
@@ -657,6 +669,7 @@ class RecetasFrame(tk.Frame):
                 conn.close()
                 
                 win.destroy()
+                recalcular_necesidad_producto(pid)
                 self.cargar_ingredientes(rid) 
             except Exception as error:
                 messagebox.showerror("Error", f"No se pudo actualizar: {error}")
