@@ -368,7 +368,7 @@ class RecetasFrame(tk.Frame):
 
             #para recaalcular la listad e la compra
             cur.execute("select producto_id from receta_ingredientes WHERE receta_id=?", (rid,))
-            lista_productos_id=cur.fetchall()
+            lista_tupla_productos_id=cur.fetchall()
             
             #borramos primero los ingredientes asociados
             cur.execute("DELETE FROM receta_ingredientes WHERE receta_id=?", (rid,))
@@ -381,7 +381,7 @@ class RecetasFrame(tk.Frame):
             conn.commit()
             print("Borrado exitoso.")
 
-            for pid in lista_productos_id:
+            for pid in lista_tupla_productos_id:
                 recalcular_necesidad_producto(pid[0])
 
         except Exception as e:
