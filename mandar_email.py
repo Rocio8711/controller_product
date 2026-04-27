@@ -1,7 +1,7 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.header import Header  # <--- Esto es clave para las ñ en el asunto
+from email.header import Header  # Esto es clave para las ñ en el asunto
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText

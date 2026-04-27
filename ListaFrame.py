@@ -217,7 +217,7 @@ class ListaFrame(tk.Frame):
             messagebox.showwarning("Vacío", "No hay productos pendientes para enviar.")
             return
 
-        #recuperamos las credenciales desde el controlador
+        #recuperamos las credenciales desde el controlador. Con getattr obtenemso el valor del atributo o none si no exisste
         destinatario = getattr(self.controller, 'usuario_email', None)
         email_user = getattr(self.controller, 'email_user', None)
         email_pass = getattr(self.controller, 'email_pass', None)
