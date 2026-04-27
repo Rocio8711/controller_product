@@ -210,10 +210,6 @@ class ListaFrame(tk.Frame):
         for item in self.tree.get_children():
             valores = self.tree.item(item)["values"]
 
-            #comprobamos que el producto no esté ya marcado como comprado
-            if len(valores) > 4 and valores[4] == "comprado":
-                continue
-
             #formateamos el texto del producto para el email
             productos.append(f"🛒 {valores[1]} - Cantidad: {valores[2]} {valores[3]}")
         #si no hay productos pendientes mostramos aviso

@@ -335,8 +335,10 @@ class InventarioFrame(tk.Frame):
                         comprar=m_new-cantidad_teorica
                         cur.execute("SELECT id FROM lista_compras WHERE producto_id=? AND comprado=0", (p_id,))
                         res=cur.fetchone()
-                        if res: cur.execute("UPDATE lista_compras SET cantidad=? WHERE id=?", (comprar, res[0]))
-                        else: cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", (p_id, comprar, u_new))
+                        if res: 
+                            cur.execute("UPDATE lista_compras SET cantidad=? WHERE id=?", (comprar, res[0]))
+                        else: 
+                            cur.execute("INSERT INTO lista_compras (producto_id, cantidad, unidad, comprado) VALUES (?, ?, ?, 0)", (p_id, comprar, u_new))
                     
                     else:
                         #si tras la modificación ya tenemos suficiente stock borramos el producto de la lista de compras pendiente

@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-import os # Añadido para manejar rutas de archivos
+import os 
 from tkinter import ttk, messagebox
 
 # Ventana Homeframe
